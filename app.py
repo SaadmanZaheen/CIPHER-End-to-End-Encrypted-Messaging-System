@@ -9,7 +9,16 @@ from routes.social import social_bp
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 
-init_db()
+try:
+    init_db()
+except Exception as e:
+    import traceback
+    print("\n" + "="*50)
+    print("💥 DATABASE INITIALIZATION ERROR 💥")
+    print("="*50)
+    traceback.print_exc()
+    print("="*50 + "\n")
+    raise e
 
 # Register blueprints
 app.register_blueprint(auth_bp)
