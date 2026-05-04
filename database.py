@@ -11,7 +11,15 @@ try:
 except ImportError:
     psycopg2 = None
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+if DATABASE_URL.startswith('"') and DATABASE_URL.endswith('"'):
+    DATABASE_URL = DATABASE_URL[1:-1]
+if DATABASE_URL.startswith("'") and DATABASE_URL.endswith("'"):
+    DATABASE_URL = DATABASE_URL[1:-1]
+# Fix postgres:// to postgresql:// for compatibility if needed
+if DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+
 # If DATA_DIR is set in environment, use it for persistent storage (e.g. on Render)
 DATA_DIR = os.environ.get('DATA_DIR', '')
 DB_PATH = os.path.join(DATA_DIR, 'app.db') if DATA_DIR else 'app.db'
@@ -158,8 +166,13 @@ class DBConn:
 
 def get_connection():
     if DATABASE_URL:
-        conn = psycopg2.connect(DATABASE_URL)
-        return DBConn(conn, True)
+        print(f">>> Attempting to connect to PostgreSQL...")
+        try:
+            conn = psycopg2.connect(DATABASE_URL)
+            return DBConn(conn, True)
+        except Exception as e:
+            print(f">>> PostgreSQL Connection Failed: {e}")
+            raise e
     else:
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row

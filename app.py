@@ -6,11 +6,16 @@ from routes.auth import auth_bp
 from routes.posts import posts_bp
 from routes.social import social_bp
 
+print(">>> Starting Flask App...")
 app = Flask(__name__)
+print(">>> App object created.")
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+print(">>> Secret key set.")
 
+print(">>> Initializing database...")
 try:
     init_db()
+    print(">>> Database initialized successfully.")
 except Exception as e:
     import traceback
     print("\n" + "="*50)
@@ -21,9 +26,11 @@ except Exception as e:
     raise e
 
 # Register blueprints
+print(">>> Registering blueprints...")
 app.register_blueprint(auth_bp)
 app.register_blueprint(posts_bp)
 app.register_blueprint(social_bp)
+print(">>> Blueprints registered.")
 
 @app.context_processor
 def inject_pending_requests():
