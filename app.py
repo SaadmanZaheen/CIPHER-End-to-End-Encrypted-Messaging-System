@@ -1,13 +1,13 @@
 import os
 import secrets
-from flask import Flask, redirect, url_for, session, render_template, send_from_directory
+from flask import Flask, redirect, url_for, session
 from database import init_db, get_pending_requests, get_unread_messages_count
 from routes.auth import auth_bp
 from routes.posts import posts_bp
 from routes.social import social_bp
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(32)  # regenerated each restart; sessions cleared on restart
+app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 
 init_db()
 
@@ -29,11 +29,8 @@ def inject_pending_requests():
 
 @app.route('/')
 def index():
-    return render_template('landing.html')
-
-@app.route('/cipher')
-def cipher():
-    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'CIPHER.html')
+    return redirect(url_for('auth.login'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
