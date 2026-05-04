@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#09090b; color:#f4f4f5; padding:20px 24px; }
+  .form-group { margin-bottom:14px; }
+  label { font-size:0.85rem; font-weight:500; color:#f4f4f5; display:block; margin-bottom:6px; }
+  input, textarea {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+    border-radius:12px; color:#f4f4f5; padding:0.7rem 1rem;
+    font-family:inherit; font-size:0.95rem; width:100%;
+    transition:all 0.3s ease;
+  }
+  input.focused, textarea.focused {
+    background:rgba(255,255,255,0.05);
+    border-color:#8b5cf6;
+    box-shadow:0 0 0 4px rgba(139,92,246,0.15);
+    outline:none;
+  }
+  input::placeholder, textarea::placeholder { color:#71717a; }
+  .row { display:flex; gap:16px; }
+  .col { flex:1; }
+  /* Toggle switch */
+  .toggle-wrap { display:flex; align-items:center; gap:10px; margin-top:4px; }
+  .toggle { width:40px; height:20px; background:#8b5cf6; border-radius:9999px; position:relative; cursor:pointer; }
+  .toggle::after { content:''; position:absolute; width:14px; height:14px; background:white; border-radius:50%; top:3px; right:3px; transition:0.3s; }
+  .toggle-label { font-size:0.82rem; color:#a1a1aa; font-weight:500; }
+</style></head>
+<body>
+  <div class="row">
+    <div class="col">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" placeholder="your_username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" class="focused" placeholder="••••••••">
+      </div>
+    </div>
+    <div class="col">
+      <div class="form-group">
+        <label>Post content</label>
+        <textarea rows="3" placeholder="What's on your mind? This will be end-to-end encrypted..."></textarea>
+      </div>
+      <div class="toggle-wrap">
+        <div class="toggle"></div>
+        <span class="toggle-label"><span style="background:rgba(139,92,246,0.2);color:#a78bfa;font-size:0.72rem;font-weight:600;padding:2px 6px;border-radius:4px;margin-right:4px;">RSA + ECC</span> E2E Encryption</span>
+      </div>
+    </div>
+  </div>
+</body></html>

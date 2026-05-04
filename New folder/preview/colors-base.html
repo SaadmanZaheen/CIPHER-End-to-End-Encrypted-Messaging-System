@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#09090b; color:#f4f4f5; padding:20px; }
+  .grid { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }
+  .swatch { border-radius:10px; overflow:hidden; }
+  .color { height:56px; }
+  .label { padding:6px 8px; background:#18181b; }
+  .name  { font-size:11px; font-weight:600; color:#f4f4f5; }
+  .hex   { font-size:10px; color:#a1a1aa; font-family:monospace; margin-top:2px; }
+</style></head>
+<body>
+<div class="grid">
+  <div class="swatch">
+    <div class="color" style="background:#09090b;border:1px solid rgba(255,255,255,0.1);"></div>
+    <div class="label"><div class="name">bg</div><div class="hex">#09090b</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color" style="background:#18181b;"></div>
+    <div class="label"><div class="name">surface</div><div class="hex">#18181b</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color" style="background:#71717a;"></div>
+    <div class="label"><div class="name">zinc-500</div><div class="hex">#71717a</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color" style="background:#a1a1aa;"></div>
+    <div class="label"><div class="name">zinc-400</div><div class="hex">#a1a1aa</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color" style="background:#f4f4f5;"></div>
+    <div class="label"><div class="name">text-main</div><div class="hex">#f4f4f5</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color" style="background:#8b5cf6;"></div>
+    <div class="label"><div class="name">accent</div><div class="hex">#8b5cf6</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color" style="background:#3b82f6;"></div>
+    <div class="label"><div class="name">blue-500</div><div class="hex">#3b82f6</div></div>
+  </div>
+</div>
+</body></html>

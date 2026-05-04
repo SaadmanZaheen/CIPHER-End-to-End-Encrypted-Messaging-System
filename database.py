@@ -117,8 +117,10 @@ class DBCursor:
 
     def execute(self, query, params=()):
         if self.is_pg:
+            import re
             query = query.replace('?', '%s')
             query = query.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'SERIAL PRIMARY KEY')
+            query = re.sub(r'TEXT\s+NOT NULL DEFAULT CURRENT_TIMESTAMP', 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP', query)
             is_insert = query.strip().upper().startswith('INSERT')
             if is_insert and 'RETURNING id' not in query:
                 query += ' RETURNING id'
@@ -197,11 +199,15 @@ def init_db():
         mac_tag     TEXT    NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )''')
+    conn.commit()
+
     # Migration: add ecc_sig to existing DBs that predate this column
     try:
         c.execute("ALTER TABLE posts ADD COLUMN ecc_sig TEXT NOT NULL DEFAULT ''")
         conn.commit()
     except Exception:
+        if conn.is_pg:
+            conn.conn.rollback()
         pass  # column already exists
 
     c.execute('''CREATE TABLE IF NOT EXISTS keys (
@@ -238,10 +244,14 @@ def init_db():
         FOREIGN KEY (sender_id)    REFERENCES users(id),
         FOREIGN KEY (recipient_id) REFERENCES users(id)
     )''')
+    conn.commit()
+    
     try:
         c.execute("ALTER TABLE messages ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0")
         conn.commit()
     except Exception:
+        if conn.is_pg:
+            conn.conn.rollback()
         pass  # column already exists
 
     conn.commit()

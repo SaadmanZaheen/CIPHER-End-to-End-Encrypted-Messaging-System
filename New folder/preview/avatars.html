@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#09090b; color:#f4f4f5; padding:20px 24px; display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap; }
+  .label { font-size:10px; color:#71717a; font-family:monospace; margin-top:8px; text-align:center; }
+  .item { display:flex; flex-direction:column; align-items:center; }
+  .avatar { display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:700; color:white; }
+  .own   { background:linear-gradient(135deg,#a78bfa,#3b82f6); }
+  .other { background:linear-gradient(135deg,#4b5563,#1f2937); }
+  .name-row { display:flex; align-items:center; gap:10px; margin-top:16px; }
+  .name { font-weight:700; }
+  .meta { font-size:0.78rem; color:#a1a1aa; }
+</style></head>
+<body>
+  <div class="item"><div class="avatar own"  style="width:32px;height:32px;font-size:0.85rem;">A</div><div class="label">sm 32px own</div></div>
+  <div class="item"><div class="avatar own"  style="width:40px;height:40px;font-size:1rem;">A</div><div class="label">md 40px own</div></div>
+  <div class="item"><div class="avatar own"  style="width:48px;height:48px;font-size:1.1rem;">A</div><div class="label">lg 48px own</div></div>
+  <div class="item"><div class="avatar own"  style="width:72px;height:72px;font-size:1.5rem;box-shadow:0 4px 15px rgba(139,92,246,0.3);">A</div><div class="label">xl 72px own</div></div>
+  <div class="item"><div class="avatar other" style="width:40px;height:40px;font-size:1rem;">B</div><div class="label">md other</div></div>
+  <div class="item"><div class="avatar other" style="width:48px;height:48px;font-size:1.1rem;">C</div><div class="label">lg other</div></div>
+  <div class="item"><div class="avatar other" style="width:72px;height:72px;font-size:1.5rem;">D</div><div class="label">xl other</div></div>
+
+  <div style="flex-basis:100%;"></div>
+  <div class="name-row">
+    <div class="avatar own" style="width:48px;height:48px;font-size:1.1rem;">A</div>
+    <div>
+      <div class="name">alice</div>
+      <div class="meta">3 hours ago</div>
+    </div>
+  </div>
+</body></html>

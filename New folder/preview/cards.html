@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#09090b; color:#f4f4f5; padding:20px 24px; display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+
+  .card {
+    background:#18181b; border:1px solid rgba(255,255,255,0.05);
+    border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    overflow:hidden;
+  }
+  .card-accent { border-color:rgba(139,92,246,0.3); box-shadow:0 10px 30px rgba(0,0,0,0.2),0 0 20px rgba(139,92,246,0.1); }
+
+  /* Post card */
+  .post-card { width:280px; }
+  .post-header { padding:14px 16px 8px; display:flex; justify-content:space-between; align-items:center; }
+  .author-row { display:flex; align-items:center; gap:10px; }
+  .avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#4b5563,#1f2937); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; color:white; }
+  .author-name { font-weight:700; font-size:0.9rem; }
+  .timestamp   { font-size:0.72rem; color:#a1a1aa; }
+  .badges-row { display:flex; gap:4px; }
+  .badge { display:inline-flex; align-items:center; gap:3px; padding:0.25em 0.6em; border-radius:6px; font-size:0.68rem; font-weight:600; }
+  .b-success { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); }
+  .b-primary { background:#8b5cf6; color:white; }
+  .post-body { padding:0 16px 16px; }
+  .post-title { font-size:1rem; font-weight:700; margin-bottom:6px; }
+  .post-text  { font-size:0.88rem; color:#d4d4d8; line-height:1.6; }
+  .post-footer { padding:10px 16px; border-top:1px solid rgba(255,255,255,0.05); }
+  .post-footer a { font-size:0.8rem; color:#a1a1aa; font-weight:600; text-decoration:none; }
+
+  /* Discover card */
+  .discover-card { width:160px; }
+  .discover-body { padding:20px 14px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .avatar-lg { width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#a78bfa,#3b82f6); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.3rem; color:white; margin-bottom:10px; box-shadow:0 4px 15px rgba(139,92,246,0.3); }
+  .btn-connect { background:transparent; border:2px solid #8b5cf6; border-radius:12px; color:#8b5cf6; font-weight:600; padding:0.35rem 0.8rem; font-size:0.8rem; cursor:pointer; font-family:inherit; width:100%; margin-top:10px; }
+</style></head>
+<body>
+  <!-- Post card -->
+  <div class="card card-accent post-card">
+    <div class="post-header">
+      <div class="author-row">
+        <div class="avatar">A</div>
+        <div>
+          <div class="author-name">alice</div>
+          <div class="timestamp">2 hours ago</div>
+        </div>
+      </div>
+      <div class="badges-row">
+        <span class="badge b-success"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> MAC</span>
+        <span class="badge b-primary"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> ECC</span>
+      </div>
+    </div>
+    <div class="post-body">
+      <div class="post-title">Key rotation complete</div>
+      <div class="post-text">New RSA + ECC keypairs generated. All future posts encrypted with fresh keys.</div>
+    </div>
+    <div class="post-footer"><a href="#">View Details</a></div>
+  </div>
+
+  <!-- Discover card -->
+  <div class="card discover-card">
+    <div class="discover-body">
+      <div class="avatar-lg">B</div>
+      <div style="font-weight:700;font-size:0.95rem;">bob</div>
+      <span class="badge" style="background:rgba(255,255,255,0.05);color:#a1a1aa;font-size:0.68rem;font-weight:600;padding:0.25em 0.6em;border-radius:6px;margin-top:6px;">Creator</span>
+      <button class="btn-connect">Connect 🔒</button>
+    </div>
+  </div>
+
+  <!-- Empty state card -->
+  <div class="card" style="width:240px;">
+    <div style="padding:28px 20px;text-align:center;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <div style="font-weight:700;margin-bottom:6px;">Your feed is quiet</div>
+      <div style="font-size:0.82rem;color:#a1a1aa;line-height:1.5;">Discover other creators to see their posts here.</div>
+    </div>
+  </div>
+</body></html>

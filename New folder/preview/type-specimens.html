@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#09090b; color:#f4f4f5; padding:20px 24px; display:flex; gap:24px; flex-wrap:wrap; }
+  .col { flex:1; min-width:200px; display:flex; flex-direction:column; gap:10px; }
+  .label { font-size:10px; color:#71717a; font-family:monospace; margin-bottom:2px; }
+  .brand { font-size:1.4rem; font-weight:800; letter-spacing:-0.5px; background:linear-gradient(135deg,#a78bfa,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .nav-link { font-size:0.95rem; font-weight:500; color:#a1a1aa; }
+  .nav-link.active { color:#f4f4f5; }
+  .code-text { font-family:ui-monospace,monospace; font-size:0.8rem; color:#60a5fa; background:rgba(59,130,246,0.1); padding:2px 6px; border-radius:4px; }
+  .post-body { font-size:1.05rem; font-weight:400; line-height:1.6; color:#f4f4f5; }
+  .timestamp { font-size:0.8rem; color:#a1a1aa; }
+</style></head>
+<body>
+  <div class="col">
+    <div class="label">Brand / Navbar</div>
+    <div class="brand">SecureConnect</div>
+    <div style="margin-top:8px;" class="label">Nav links</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <span class="nav-link active">Feed</span>
+      <span class="nav-link">Messages</span>
+      <span class="nav-link">Network</span>
+      <span class="nav-link">Profile</span>
+    </div>
+  </div>
+  <div class="col">
+    <div class="label">Post content</div>
+    <div class="post-body">This is a secure post. All content is end-to-end encrypted using RSA + ECC before storage.</div>
+    <div class="timestamp">2 hours ago</div>
+    <div style="margin-top:8px;" class="label">Monospace / crypto</div>
+    <div class="code-text">ECDH: a3f1b2c4…</div>
+  </div>
+</body></html>

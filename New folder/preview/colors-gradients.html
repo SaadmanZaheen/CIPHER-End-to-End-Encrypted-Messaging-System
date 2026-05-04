@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#09090b; color:#f4f4f5; padding:20px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start; }
+  .item { display:flex; flex-direction:column; gap:8px; }
+  .swatch { height:64px; border-radius:12px; width:160px; }
+  .label { font-size:11px; color:#a1a1aa; font-weight:500; }
+  .brand-text { font-size:22px; font-weight:800; letter-spacing:-0.5px; background:linear-gradient(135deg,#a78bfa,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+</style></head>
+<body>
+  <div class="item">
+    <div class="swatch" style="background:linear-gradient(135deg,#a78bfa,#3b82f6);"></div>
+    <div class="label">Brand / Avatar-own</div>
+  </div>
+  <div class="item">
+    <div class="swatch" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);"></div>
+    <div class="label">Button Primary</div>
+  </div>
+  <div class="item">
+    <div class="swatch" style="background:linear-gradient(135deg,#7c3aed,#2563eb);"></div>
+    <div class="label">Button Hover</div>
+  </div>
+  <div class="item">
+    <div class="swatch" style="background:linear-gradient(135deg,#4b5563,#1f2937);"></div>
+    <div class="label">Avatar-other</div>
+  </div>
+  <div class="item" style="justify-content:center;padding-top:8px;">
+    <div class="brand-text">SecureConnect</div>
+    <div class="label">Brand text treatment</div>
+  </div>
+</body></html>

@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip freeze *)",
+      "Bash(pip show *)",
+      "Bash(python -c \"import flask; print\\('flask', flask.__version__\\)\")",
+      "Bash(python -c \"import sympy; print\\('sympy', sympy.__version__\\)\")",
+      "Bash(python3 -c \"import flask; print\\('flask', flask.__version__\\)\")",
+      "Bash(python3 -c \"import sympy; print\\('sympy', sympy.__version__\\)\")",
+      "Bash(py -c \"import flask; print\\('flask=='+flask.__version__\\); import sympy; print\\('sympy=='+sympy.__version__\\)\")",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(py -c ' *)",
+      "Bash(python -c \"import sys,json; nb=json.load\\(sys.stdin\\); [print\\('CELL',i,':',c['cell_type'],'|',''.join\\(c['source']\\)[:300]\\) for i,c in enumerate\\(nb['cells'][10:]\\)]\")",
+      "Bash(cd /d \"e:\\\\447_Project\")",
+      "Bash(python -c \"from routes.social import social_bp; from database import are_friends, get_conversation, verify_message_mac, insert_message, send_friend_request, get_friendship, get_pending_requests, get_sent_requests, update_friendship_status, get_friends; print\\('All imports OK'\\)\")",
+      "Bash(python -c \"import os; print\\(os.path.exists\\('e:/447_Project/templates/inbox.html'\\)\\)\")"
+    ]
+  }
+}

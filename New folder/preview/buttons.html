@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#09090b; color:#f4f4f5; padding:20px 24px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .section-label { font-size:10px; color:#71717a; font-family:monospace; margin-bottom:10px; }
+  .section { margin-bottom:18px; }
+
+  /* Primary */
+  .btn-primary {
+    background: linear-gradient(135deg,#8b5cf6,#3b82f6);
+    border:none; border-radius:12px; color:white;
+    font-weight:600; padding:0.6rem 1.5rem; font-size:0.95rem;
+    box-shadow:0 4px 15px rgba(124,58,237,0.4);
+    cursor:pointer; font-family:inherit;
+  }
+  /* Outline */
+  .btn-outline {
+    background:transparent; border:2px solid #8b5cf6;
+    border-radius:12px; color:#8b5cf6;
+    font-weight:600; padding:0.55rem 1.4rem; font-size:0.95rem;
+    cursor:pointer; font-family:inherit;
+  }
+  /* Pill */
+  .btn-pill {
+    background:linear-gradient(135deg,#8b5cf6,#3b82f6);
+    border:none; border-radius:9999px; color:white;
+    font-weight:600; padding:0.55rem 1.5rem; font-size:0.9rem;
+    box-shadow:0 4px 15px rgba(124,58,237,0.35);
+    cursor:pointer; font-family:inherit;
+  }
+  /* Small */
+  .btn-sm {
+    background:linear-gradient(135deg,#8b5cf6,#3b82f6);
+    border:none; border-radius:12px; color:white;
+    font-weight:600; padding:0.35rem 1rem; font-size:0.82rem;
+    cursor:pointer; font-family:inherit;
+  }
+  /* Danger */
+  .btn-danger {
+    background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4);
+    border-radius:12px; color:#f87171;
+    font-weight:600; padding:0.55rem 1.4rem; font-size:0.9rem;
+    cursor:pointer; font-family:inherit;
+  }
+  /* Success */
+  .btn-success {
+    background:#10b981; border:none;
+    border-radius:12px; color:white;
+    font-weight:600; padding:0.55rem 1.4rem; font-size:0.9rem;
+    cursor:pointer; font-family:inherit;
+  }
+  /* Disabled */
+  .btn-disabled {
+    background:rgba(255,255,255,0.05); border:none;
+    border-radius:12px; color:#a1a1aa;
+    font-weight:600; padding:0.55rem 1.4rem; font-size:0.9rem;
+    cursor:not-allowed; font-family:inherit; opacity:0.7;
+  }
+  /* Ghost / text */
+  .btn-ghost {
+    background:transparent; border:none;
+    color:#a1a1aa; font-weight:600; padding:0.5rem 0.8rem; font-size:0.9rem;
+    cursor:pointer; font-family:inherit;
+    text-decoration:none; display:inline-block;
+  }
+</style></head>
+<body>
+  <div class="section">
+    <div class="section-label">Default variants</div>
+    <div class="row">
+      <button class="btn-primary">Post securely</button>
+      <button class="btn-outline">View Details</button>
+      <button class="btn-pill">Discover</button>
+      <button class="btn-sm">Edit Post</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">Semantic</div>
+    <div class="row">
+      <button class="btn-success">Accept</button>
+      <button class="btn-danger">Decline</button>
+      <button class="btn-disabled" disabled>Request Pending</button>
+      <a class="btn-ghost">← Back</a>
+    </div>
+  </div>
+</body></html>
