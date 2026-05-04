@@ -1,6 +1,6 @@
 import os
 import secrets
-from flask import Flask, redirect, url_for, session
+from flask import Flask, session, render_template
 from database import init_db, get_pending_requests, get_unread_messages_count
 from routes.auth import auth_bp
 from routes.posts import posts_bp
@@ -29,7 +29,7 @@ def inject_pending_requests():
 
 @app.route('/')
 def index():
-    return redirect(url_for('auth.login'))
+    return render_template('landing.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}CIPHER — Encrypted Social Platform{% endblock %}
+{% block body_class %}auth-bg{% endblock %}
+{% block content %}
+<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+  <div style="max-width: 560px; width: 100%; text-align: center;">
+
+    <div class="fade-in" style="animation-delay: 0s; margin-bottom: 2.5rem;">
+      <div style="font-family: var(--pixel); font-size: 2.8rem; letter-spacing: 0.18em;
+                  color: var(--cyan); text-shadow: var(--glow-c); margin-bottom: 1rem;
+                  line-height: 1.2;">
+        <span class="cipher-logo">CIPHER</span>
+      </div>
+      <div style="font-family: var(--pixel); font-size: 0.5rem; color: var(--magenta);
+                  letter-spacing: 0.15em; text-shadow: var(--glow-m); margin-bottom: 0.5rem;">
+        END-TO-END ENCRYPTED SOCIAL PLATFORM
+      </div>
+      <div style="font-family: var(--mono); font-size: 0.78rem; color: var(--muted);
+                  line-height: 1.8; margin-top: 1.25rem;">
+        RSA-2048 · ECDSA · CBC-MAC · TOTP 2FA
+      </div>
+    </div>
+
+    <hr style="border: none; height: 1px; margin: 2rem auto; width: 60%;
+               background: linear-gradient(90deg, transparent, rgba(0,229,255,0.2), transparent); opacity: 1;">
+
+    <div class="fade-in" style="animation-delay: 0.15s; margin-bottom: 2.5rem; padding: 0 1rem;">
+      <p style="font-family: var(--sans); font-size: 0.92rem; color: var(--muted); line-height: 1.85; margin: 0;">
+        Every post, message, and profile field is encrypted at rest using
+        <span style="color: var(--text);">from-scratch cryptographic primitives</span> —
+        no third-party crypto libraries.
+      </p>
+    </div>
+
+    <div class="fade-in d-flex justify-content-center gap-3" style="animation-delay: 0.25s; flex-wrap: wrap;">
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="min-width: 160px;">
+        CREATE ACCOUNT →
+      </a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary" style="min-width: 160px;">
+        SIGN IN
+      </a>
+    </div>
+
+    <div class="fade-in" style="animation-delay: 0.4s; margin-top: 3rem;">
+      <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+        <div style="text-align: center;">
+          <div style="font-family: var(--pixel); font-size: 0.55rem; color: var(--cyan);
+                      text-shadow: var(--glow-c); margin-bottom: 6px;">RSA+ECC</div>
+          <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">encryption</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-family: var(--pixel); font-size: 0.55rem; color: var(--magenta);
+                      text-shadow: var(--glow-m); margin-bottom: 6px;">CBC-MAC</div>
+          <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">integrity</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-family: var(--pixel); font-size: 0.55rem; color: var(--violet);
+                      text-shadow: var(--glow-v); margin-bottom: 6px;">TOTP 2FA</div>
+          <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">auth</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-family: var(--pixel); font-size: 0.55rem; color: var(--amber);
+                      text-shadow: var(--glow-a); margin-bottom: 6px;">E2E MSG</div>
+          <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">messaging</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
