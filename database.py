@@ -5,13 +5,20 @@ import secrets
 from crypto.rsa import generate_keypair, encrypt, decrypt
 from crypto.mac import generate_mac, verify_mac
 
-DB_PATH = 'app.db'
-SERVER_KEYS_PATH = 'server_keys.json'
+try:
+    import psycopg2
+    import psycopg2.extras
+except ImportError:
+    psycopg2 = None
 
-
-# ── Server key bootstrap ──────────────────────────────────────────────────────
+DATABASE_URL = os.environ.get('DATABASE_URL')
+# If DATA_DIR is set in environment, use it for persistent storage (e.g. on Render)
+DATA_DIR = os.environ.get('DATA_DIR', '')
+DB_PATH = os.path.join(DATA_DIR, 'app.db') if DATA_DIR else 'app.db'
+SERVER_KEYS_PATH = os.path.join(DATA_DIR, 'server_keys.json') if DATA_DIR else 'server_keys.json'
 
 def _init_server_keys():
+    if os.environ.get('RSA_PUB_N'): return
     if not os.path.exists(SERVER_KEYS_PATH):
         pub, priv = generate_keypair(bits=256)
         data = {
@@ -22,8 +29,13 @@ def _init_server_keys():
         with open(SERVER_KEYS_PATH, 'w') as f:
             json.dump(data, f)
 
-
 def _load_server_keys():
+    if os.environ.get('RSA_PUB_N'):
+        return {
+            'rsa_pub': [int(os.environ.get('RSA_PUB_N')), int(os.environ.get('RSA_PUB_E'))],
+            'rsa_priv': [int(os.environ.get('RSA_PRIV_N')), int(os.environ.get('RSA_PRIV_D'))],
+            'mac_key': os.environ.get('MAC_KEY')
+        }
     with open(SERVER_KEYS_PATH, 'r') as f:
         return json.load(f)
 
@@ -93,10 +105,63 @@ def decrypt_rsa_priv(enc_str):
 
 # ── DB connection ─────────────────────────────────────────────────────────────
 
+class DBCursor:
+    def __init__(self, conn, is_pg):
+        self.conn = conn
+        self.is_pg = is_pg
+        if is_pg:
+            self.cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        else:
+            self.cursor = conn.cursor()
+        self.lastrowid = None
+
+    def execute(self, query, params=()):
+        if self.is_pg:
+            query = query.replace('?', '%s')
+            query = query.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'SERIAL PRIMARY KEY')
+            is_insert = query.strip().upper().startswith('INSERT')
+            if is_insert and 'RETURNING id' not in query:
+                query += ' RETURNING id'
+            self.cursor.execute(query, params)
+            if is_insert:
+                res = self.cursor.fetchone()
+                self.lastrowid = res['id'] if res else None
+        else:
+            self.cursor.execute(query, params)
+            self.lastrowid = self.cursor.lastrowid
+        return self
+
+    def fetchone(self):
+        return self.cursor.fetchone()
+
+    def fetchall(self):
+        return self.cursor.fetchall()
+
+class DBConn:
+    def __init__(self, conn, is_pg):
+        self.conn = conn
+        self.is_pg = is_pg
+
+    def cursor(self):
+        return DBCursor(self.conn, self.is_pg)
+
+    def execute(self, query, params=()):
+        return self.cursor().execute(query, params)
+
+    def commit(self):
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
+
 def get_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if DATABASE_URL:
+        conn = psycopg2.connect(DATABASE_URL)
+        return DBConn(conn, True)
+    else:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return DBConn(conn, False)
 
 
 # ── Table creation ────────────────────────────────────────────────────────────
