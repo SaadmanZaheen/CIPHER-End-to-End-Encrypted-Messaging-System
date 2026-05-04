@@ -1,71 +1,1024 @@
-{% extends "base.html" %}
-{% block title %}CIPHER — Encrypted Social Platform{% endblock %}
-{% block body_class %}auth-bg{% endblock %}
-{% block content %}
-<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
-  <div style="max-width: 560px; width: 100%; text-align: center;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CIPHER — Secure Transmission</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0d0b1a;
+      --cyan:    #00e5ff;
+      --magenta: #ff2d78;
+      --violet:  #b84fff;
+      --amber:   #ffb830;
+      --green:   #39ff8a;
+      --text:    #e8e0f0;
+      --muted:   #8b7fa8;
+      --dim:     #3a3258;
+      --pixel: 'Press Start 2P', monospace;
+      --mono:  'DM Mono', monospace;
+      --sans:  'DM Sans', sans-serif;
+    }
 
-    <div class="fade-in" style="animation-delay: 0s; margin-bottom: 2.5rem;">
-      <div style="font-family: var(--pixel); font-size: 2.8rem; letter-spacing: 0.18em;
-                  color: var(--cyan); text-shadow: var(--glow-c); margin-bottom: 1rem;
-                  line-height: 1.2;">
-        <span class="cipher-logo">CIPHER</span>
-      </div>
-      <div style="font-family: var(--pixel); font-size: 0.5rem; color: var(--magenta);
-                  letter-spacing: 0.15em; text-shadow: var(--glow-m); margin-bottom: 0.5rem;">
-        END-TO-END ENCRYPTED SOCIAL PLATFORM
-      </div>
-      <div style="font-family: var(--mono); font-size: 0.78rem; color: var(--muted);
-                  line-height: 1.8; margin-top: 1.25rem;">
-        RSA-2048 · ECDSA · CBC-MAC · TOTP 2FA
-      </div>
-    </div>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: auto; }
 
-    <hr style="border: none; height: 1px; margin: 2rem auto; width: 60%;
-               background: linear-gradient(90deg, transparent, rgba(0,229,255,0.2), transparent); opacity: 1;">
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    <div class="fade-in" style="animation-delay: 0.15s; margin-bottom: 2.5rem; padding: 0 1rem;">
-      <p style="font-family: var(--sans); font-size: 0.92rem; color: var(--muted); line-height: 1.85; margin: 0;">
-        Every post, message, and profile field is encrypted at rest using
-        <span style="color: var(--text);">from-scratch cryptographic primitives</span> —
-        no third-party crypto libraries.
-      </p>
-    </div>
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.055) 2px, rgba(0,0,0,0.055) 4px
+      );
+      pointer-events: none;
+      z-index: 9000;
+    }
 
-    <div class="fade-in d-flex justify-content-center gap-3" style="animation-delay: 0.25s; flex-wrap: wrap;">
-      <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="min-width: 160px;">
-        CREATE ACCOUNT →
-      </a>
-      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary" style="min-width: 160px;">
-        SIGN IN
-      </a>
-    </div>
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect x='0' y='0' width='1' height='1' fill='rgba(255,255,255,0.015)'/%3E%3Crect x='2' y='2' width='1' height='1' fill='rgba(255,255,255,0.010)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 8999;
+    }
 
-    <div class="fade-in" style="animation-delay: 0.4s; margin-top: 3rem;">
-      <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
-        <div style="text-align: center;">
-          <div style="font-family: var(--pixel); font-size: 0.55rem; color: var(--cyan);
-                      text-shadow: var(--glow-c); margin-bottom: 6px;">RSA+ECC</div>
-          <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">encryption</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-family: var(--pixel); font-size: 0.55rem; color: var(--magenta);
-                      text-shadow: var(--glow-m); margin-bottom: 6px;">CBC-MAC</div>
-          <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">integrity</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-family: var(--pixel); font-size: 0.55rem; color: var(--violet);
-                      text-shadow: var(--glow-v); margin-bottom: 6px;">TOTP 2FA</div>
-          <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">auth</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-family: var(--pixel); font-size: 0.55rem; color: var(--amber);
-                      text-shadow: var(--glow-a); margin-bottom: 6px;">E2E MSG</div>
-          <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">messaging</div>
-        </div>
-      </div>
-    </div>
+    section {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-  </div>
+    /* ═══ ACT I ═══ */
+    #act1 {
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #stars-canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    /* ═══ TERMINAL WINDOW ═══ */
+    .act1-container {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 2.5rem;
+    }
+
+    .terminal-window {
+      width: min(580px, 90vw);
+      background: #0e0e1a;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 9px;
+      box-shadow:
+        0 0 0 1px rgba(0,229,255,0.06),
+        0 24px 64px rgba(0,0,0,0.7),
+        0 0 40px rgba(0,229,255,0.04);
+      overflow: hidden;
+    }
+
+    .terminal-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      background: #131324;
+      border-bottom: 1px solid rgba(255,255,255,0.055);
+    }
+    .terminal-dots { display: flex; gap: 6px; }
+    .terminal-dot  { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-red    { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green  { background: #28c840; }
+    .terminal-title {
+      font-family: var(--mono);
+      font-size: 0.52rem;
+      color: var(--muted);
+      letter-spacing: 0.13em;
+    }
+
+    .terminal-body {
+      padding: 18px 22px 22px;
+    }
+
+    .boot-line {
+      font-family: var(--mono);
+      font-size: clamp(0.58rem, 1.3vw, 0.8rem);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      line-height: 2;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    .boot-line::before { content: '> '; color: rgba(139,127,168,0.55); }
+    .boot-line.done {
+      opacity: 1;
+      color: var(--cyan);
+      text-shadow: 0 0 8px rgba(0,229,255,0.35);
+    }
+    .boot-line.done::before {
+      content: '✓ ';
+      color: var(--cyan);
+    }
+    .boot-line.typing {
+      opacity: 1;
+    }
+    .boot-line.typing::after {
+      content: '▋';
+      animation: cur 0.7s step-end infinite;
+      color: var(--cyan);
+      margin-left: 2px;
+    }
+    @keyframes cur { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .logo-reveal {
+      margin-top: 0;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 1s ease, transform 1s ease;
+      display: flex; flex-direction: column;
+      align-items: center;
+    }
+    .logo-reveal.show { opacity: 1; transform: translateY(0); }
+
+    .cipher-wordmark {
+      font-family: var(--pixel);
+      font-size: clamp(1.8rem, 6vw, 3.5rem);
+      letter-spacing: 0.18em;
+      color: var(--cyan);
+      text-shadow:
+        0 0 10px rgba(0,229,255,0.9),
+        0 0 30px rgba(0,229,255,0.5),
+        0 0 70px rgba(0,229,255,0.2);
+    }
+
+    .tagline {
+      font-family: var(--mono);
+      font-size: clamp(0.5rem, 1.2vw, 0.7rem);
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    /* ═══ ACT II ═══ */
+    #act2 {
+      background: radial-gradient(ellipse 100% 80% at 50% 50%, #0a0820 0%, #000 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+
+    #act2-stars {
+      position: absolute; inset: 0;
+      pointer-events: none;
+    }
+
+    .act2-content {
+      position: relative; z-index: 10;
+      text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 1.5rem;
+    }
+
+    .signal-label {
+      font-family: var(--pixel);
+      font-size: 0.45rem;
+      color: var(--magenta);
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 8px rgba(255,45,120,0.6);
+      border: 1px solid rgba(255,45,120,0.3);
+      padding: 5px 12px; border-radius: 2px;
+    }
+
+    .signal-wordmark {
+      font-family: var(--pixel);
+      font-size: clamp(3rem, 10vw, 7rem);
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--cyan);
+      text-shadow: 0 0 40px rgba(0,229,255,0.3);
+      letter-spacing: 0.2em;
+      line-height: 1;
+    }
+
+    .signal-sub {
+      font-family: var(--mono);
+      font-size: clamp(0.65rem, 1.5vw, 0.85rem);
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      line-height: 1.8;
+      max-width: 420px;
+    }
+    .signal-sub span { color: var(--text); }
+
+    /* ═══ COMET OVERLAY ═══ */
+    #comet-overlay {
+      position: fixed; inset: 0;
+      z-index: 7000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    #comet-canvas {
+      width: 100%; height: 100%;
+      display: block;
+    }
+
+    /* ═══ ACT III ═══ */
+    #act3 {
+      background: #000;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+
+    #grid-canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+    }
+
+    .grid-content {
+      position: relative; z-index: 10;
+      text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 1.25rem;
+    }
+
+    .grid-wordmark {
+      font-family: var(--pixel);
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      letter-spacing: 0.2em;
+      line-height: 1;
+      background: linear-gradient(180deg, #fff 0%, var(--cyan) 40%, var(--magenta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(0,229,255,0.4));
+    }
+
+    .grid-sub {
+      font-family: var(--mono);
+      font-size: clamp(0.6rem, 1.3vw, 0.75rem);
+      color: var(--muted);
+      letter-spacing: 0.14em;
+    }
+
+    .grid-wordmark-reflect {
+      font-family: var(--pixel);
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      letter-spacing: 0.2em;
+      line-height: 1;
+      background: linear-gradient(180deg, var(--magenta) 0%, transparent 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transform: scaleY(-1);
+      opacity: 0.25;
+      margin-top: -0.3em;
+      pointer-events: none;
+      filter: blur(1px);
+    }
+
+    /* ═══ ACT IV ═══ */
+    #act4 {
+      background: linear-gradient(180deg, #000 0%, #0d0b1a 60%, #0d0b1a 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+
+    #freq-canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    .freq-content {
+      position: relative; z-index: 10;
+      text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 1.5rem;
+    }
+
+    .freq-eyebrow {
+      font-family: var(--pixel);
+      font-size: 0.42rem;
+      color: var(--amber);
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 8px rgba(255,184,48,0.5);
+    }
+
+    .freq-headline {
+      font-family: var(--pixel);
+      font-size: clamp(0.7rem, 2vw, 1.1rem);
+      color: var(--text);
+      letter-spacing: 0.1em;
+      line-height: 2;
+      max-width: 560px;
+    }
+    .freq-headline em {
+      font-style: normal;
+      color: var(--cyan);
+      text-shadow: 0 0 12px rgba(0,229,255,0.5);
+    }
+
+    .freq-sub {
+      font-family: var(--mono);
+      font-size: clamp(0.65rem, 1.3vw, 0.78rem);
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      line-height: 1.9;
+    }
+
+    /* CTA buttons */
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .cta-btn {
+      font-family: var(--pixel);
+      font-size: clamp(0.5rem, 1.1vw, 0.65rem);
+      letter-spacing: 0.1em;
+      background: var(--cyan);
+      color: #0d0b1a;
+      border: none; border-radius: 3px;
+      padding: 14px 28px;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      box-shadow:
+        0 0 15px rgba(0,229,255,0.6),
+        0 0 40px rgba(0,229,255,0.3),
+        0 0 80px rgba(0,229,255,0.1);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .cta-btn::after {
+      content: '';
+      position: absolute; top: 0; left: -60%;
+      width: 40%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: skewX(-20deg);
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .cta-btn:hover::after { opacity: 1; animation: shimmer 0.6s ease forwards; }
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 0 25px rgba(0,229,255,0.9),
+        0 0 60px rgba(0,229,255,0.5),
+        0 0 100px rgba(0,229,255,0.2);
+      text-decoration: none;
+      color: #0d0b1a;
+    }
+    .cta-btn:active { transform: translateY(1px) scale(0.98); }
+
+    .cta-outline {
+      background: transparent;
+      color: var(--cyan);
+      border: 1.5px solid rgba(0,229,255,0.55);
+      box-shadow: 0 0 10px rgba(0,229,255,0.15), inset 0 0 20px rgba(0,229,255,0.03);
+    }
+    .cta-outline:hover {
+      background: rgba(0,229,255,0.07);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 50px rgba(0,229,255,0.15);
+    }
+
+    @keyframes shimmer { 0%{left:-60%} 100%{left:140%} }
+
+    /* Feature badges */
+    .feature-badges {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .badge-item { text-align: center; }
+    .badge-label {
+      font-family: var(--pixel);
+      font-size: 0.5rem;
+      margin-bottom: 5px;
+    }
+    .badge-label.c { color: var(--cyan);    text-shadow: 0 0 10px rgba(0,229,255,0.5);  }
+    .badge-label.m { color: var(--magenta); text-shadow: 0 0 10px rgba(255,45,120,0.5); }
+    .badge-label.v { color: var(--violet);  text-shadow: 0 0 10px rgba(184,79,255,0.5); }
+    .badge-label.a { color: var(--amber);   text-shadow: 0 0 10px rgba(255,184,48,0.4); }
+    .badge-sub {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--dim);
+    }
+
+    /* Reveal utility */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.15s; }
+    .reveal-delay-2 { transition-delay: 0.3s;  }
+    .reveal-delay-3 { transition-delay: 0.45s; }
+    .reveal-delay-4 { transition-delay: 0.6s;  }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: var(--dim); }
+  </style>
+</head>
+<body>
+
+<!-- ═══ COMET OVERLAY — fixed, above all sections ═══ -->
+<div id="comet-overlay">
+  <canvas id="comet-canvas"></canvas>
 </div>
-{% endblock %}
+
+<!-- ═══ ACT I — BOOT SEQUENCE ═══ -->
+<section id="act1">
+  <canvas id="stars-canvas"></canvas>
+  <div class="act1-container">
+    <div class="terminal-window">
+      <div class="terminal-titlebar">
+        <div class="terminal-dots">
+          <div class="terminal-dot dot-red"></div>
+          <div class="terminal-dot dot-yellow"></div>
+          <div class="terminal-dot dot-green"></div>
+        </div>
+        <div class="terminal-title">CIPHER — BOOT SEQUENCE v2.0</div>
+      </div>
+      <div class="terminal-body">
+        <div id="boot-lines"></div>
+      </div>
+    </div>
+    <div class="logo-reveal" id="logo-reveal">
+      <div class="cipher-wordmark" id="act1-cipher">CIPHER</div>
+      <div class="tagline">END · TO · END · ENCRYPTED · MESSAGING</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ACT II — SIGNAL LOST ═══ -->
+<section id="act2">
+  <canvas id="act2-stars"></canvas>
+  <div class="act2-content">
+    <div class="signal-label reveal">SIGNAL INTERCEPTED</div>
+    <div class="signal-wordmark reveal reveal-delay-1" id="act2-cipher">CIPHER</div>
+    <div class="signal-sub reveal reveal-delay-2">
+      <span>No plaintext ever leaves your device.</span><br>
+      Every message, every post — encrypted before transmission.<br>
+      Only the <span>intended recipient</span> holds the key.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ACT III — GRID HORIZON ═══ -->
+<section id="act3">
+  <canvas id="grid-canvas"></canvas>
+  <div class="grid-content">
+    <div class="grid-sub reveal" style="color:var(--violet);letter-spacing:0.2em;font-size:0.62rem;">RSA · ECC · ECDH · CBC-MAC</div>
+    <div class="grid-wordmark reveal reveal-delay-1">CIPHER</div>
+    <div class="grid-wordmark-reflect">CIPHER</div>
+    <div class="grid-sub reveal reveal-delay-2">Built on cryptography. Not promises.</div>
+  </div>
+</section>
+
+<!-- ═══ ACT IV — FREQUENCY + CTA ═══ -->
+<section id="act4">
+  <canvas id="freq-canvas"></canvas>
+  <div class="freq-content">
+    <div class="freq-eyebrow reveal">TRANSMISSION SECURE</div>
+    <div class="freq-headline reveal reveal-delay-1">
+      WHERE ONLY THE<br>
+      <em>INTENDED LISTENER</em><br>
+      HEARS.
+    </div>
+    <div class="freq-sub reveal reveal-delay-2">
+      RSA keypairs. ECC handshakes. Zero trust.<br>
+      Your identity is yours alone.
+    </div>
+    <div class="cta-row reveal reveal-delay-3">
+      <a href="{{ url_for('auth.register') }}" class="cta-btn">CREATE ACCOUNT &#x2192;</a>
+      <a href="{{ url_for('auth.login') }}" class="cta-btn cta-outline">SIGN IN</a>
+    </div>
+    <div class="feature-badges reveal reveal-delay-4">
+      <div class="badge-item">
+        <div class="badge-label c">RSA+ECC</div>
+        <div class="badge-sub">encryption</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-label m">CBC-MAC</div>
+        <div class="badge-sub">integrity</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-label v">TOTP 2FA</div>
+        <div class="badge-sub">auth</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-label a">E2E MSG</div>
+        <div class="badge-sub">messaging</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ═══════════════════════════════════
+   UTILITIES
+═══════════════════════════════════ */
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+const WORD  = 'CIPHER';
+const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const BIN   = '01';
+const HEX   = '0123456789ABCDEF';
+function rc(s) { return s[Math.floor(Math.random() * s.length)]; }
+
+/* ═══════════════════════════════════
+   ACT I — STAR FIELD (parallax)
+═══════════════════════════════════ */
+const sc = document.getElementById('stars-canvas');
+const sCtx = sc.getContext('2d');
+let stars1 = [];
+
+function resizeS1() {
+  sc.width = window.innerWidth; sc.height = window.innerHeight;
+  stars1 = Array.from({ length: 180 }, () => ({
+    x: Math.random() * sc.width,
+    y: Math.random() * sc.height,
+    r: Math.random() * 1.2 + 0.2,
+    o: Math.random() * 0.7 + 0.15,
+    sp: Math.random() * 0.3 + 0.05,
+  }));
+}
+resizeS1();
+window.addEventListener('resize', resizeS1);
+
+let py1 = 0;
+window.addEventListener('scroll', () => { py1 = window.scrollY * 0.25; });
+
+(function loop1() {
+  sCtx.clearRect(0, 0, sc.width, sc.height);
+  stars1.forEach(s => {
+    const y = (s.y + py1 * s.sp) % sc.height;
+    sCtx.beginPath(); sCtx.arc(s.x, y, s.r, 0, Math.PI * 2);
+    sCtx.fillStyle = `rgba(255,255,255,${s.o})`; sCtx.fill();
+  });
+  requestAnimationFrame(loop1);
+})();
+
+/* ═══════════════════════════════════
+   ACT I — BOOT SEQUENCE
+═══════════════════════════════════ */
+const BOOT_LINES = [
+  'INITIALIZING RSA KEYPAIR...',
+  'ECC HANDSHAKE COMPLETE',
+  'CBC-MAC VERIFIED',
+  'SESSION TOKEN SIGNED',
+  'ALL SYSTEMS NOMINAL',
+];
+
+const linesEl = document.getElementById('boot-lines');
+const logoEl  = document.getElementById('logo-reveal');
+
+async function runBoot() {
+  await delay(400);
+  for (let i = 0; i < BOOT_LINES.length; i++) {
+    const el = document.createElement('div');
+    el.className = 'boot-line typing';
+    el.textContent = BOOT_LINES[i];
+    linesEl.appendChild(el);
+    await delay(480);
+    el.classList.remove('typing'); el.classList.add('done');
+  }
+  await delay(500);
+}
+
+/* ═══════════════════════════════════
+   ACT I — 4-PHASE CIPHER SCRAMBLE
+═══════════════════════════════════ */
+function scrambleEl(el, charset, ms, color, shadow) {
+  return new Promise(res => {
+    el.style.color = color; el.style.textShadow = shadow;
+    const t0 = Date.now();
+    const iv = setInterval(() => {
+      let s = ''; for (let i = 0; i < WORD.length; i++) s += rc(charset);
+      el.textContent = s;
+      if (Date.now() - t0 >= ms) { clearInterval(iv); res(); }
+    }, 50);
+  });
+}
+
+function resolveEl(el) {
+  return new Promise(res => {
+    el.style.color = 'var(--cyan)';
+    el.style.textShadow = '0 0 10px rgba(0,229,255,0.9),0 0 30px rgba(0,229,255,0.5),0 0 70px rgba(0,229,255,0.2)';
+    let i = 0;
+    const iv = setInterval(() => {
+      if (i >= WORD.length) { clearInterval(iv); el.textContent = WORD; res(); return; }
+      let s = WORD.slice(0, i + 1);
+      for (let j = i + 1; j < WORD.length; j++) s += rc(HEX);
+      el.textContent = s; i++;
+    }, 80);
+  });
+}
+
+async function runAct1Scramble(el) {
+  await scrambleEl(el, ALPHA, 700, '#39ff8a', '0 0 10px rgba(57,255,138,0.5)');
+  await delay(150);
+  await scrambleEl(el, BIN,   700, '#39ff8a', '0 0 10px rgba(57,255,138,0.5)');
+  await delay(150);
+  await scrambleEl(el, HEX,   700, '#f5c842', '0 0 10px rgba(245,200,66,0.5)');
+  await delay(150);
+  await resolveEl(el);
+}
+
+/* ═══════════════════════════════════
+   ACT II — DRIFTING STAR FIELD
+═══════════════════════════════════ */
+const c2 = document.getElementById('act2-stars');
+const ctx2 = c2.getContext('2d');
+let stars2 = [];
+
+function resizeS2() {
+  c2.width = window.innerWidth; c2.height = window.innerHeight;
+  stars2 = Array.from({ length: 260 }, () => ({
+    x: Math.random() * c2.width, y: Math.random() * c2.height,
+    r: Math.random() * 1.4 + 0.1, o: Math.random() * 0.6 + 0.1,
+    vx: (Math.random() - 0.5) * 0.12, vy: (Math.random() - 0.5) * 0.08,
+    hue: Math.random() < 0.08 ? (Math.random() < 0.5 ? 'c' : 'm') : 'w',
+  }));
+}
+resizeS2();
+window.addEventListener('resize', resizeS2);
+
+let py2 = 0;
+window.addEventListener('scroll', () => {
+  py2 = (window.scrollY - document.getElementById('act2').offsetTop) * 0.18;
+});
+
+(function loop2() {
+  ctx2.clearRect(0, 0, c2.width, c2.height);
+  stars2.forEach(s => {
+    s.x += s.vx; s.y += s.vy;
+    if (s.x < 0) s.x = c2.width;  if (s.x > c2.width)  s.x = 0;
+    if (s.y < 0) s.y = c2.height; if (s.y > c2.height) s.y = 0;
+    const y = ((s.y + py2 * 0.5) % c2.height + c2.height) % c2.height;
+    ctx2.beginPath(); ctx2.arc(s.x, y, s.r, 0, Math.PI * 2);
+    ctx2.fillStyle = s.hue === 'c' ? `rgba(0,229,255,${s.o})`
+                   : s.hue === 'm' ? `rgba(255,45,120,${s.o})`
+                   : `rgba(255,255,255,${s.o})`;
+    ctx2.fill();
+  });
+  requestAnimationFrame(loop2);
+})();
+
+/* ═══════════════════════════════════
+   ACT II — HOLLOW SCRAMBLE
+   Keeps transparent fill + cyan stroke
+═══════════════════════════════════ */
+async function runAct2Scramble(el) {
+  el.style.color = 'transparent';
+  el.style.webkitTextStroke = '1.5px var(--cyan)';
+  el.style.textShadow = '0 0 40px rgba(0,229,255,0.3)';
+
+  await new Promise(res => {
+    const t0 = Date.now();
+    const iv = setInterval(() => {
+      let s = ''; for (let i = 0; i < WORD.length; i++) s += rc(HEX);
+      el.textContent = s;
+      if (Date.now() - t0 >= 1100) { clearInterval(iv); res(); }
+    }, 80);
+  });
+
+  await new Promise(res => {
+    let i = 0;
+    const iv = setInterval(() => {
+      if (i >= WORD.length) { clearInterval(iv); el.textContent = WORD; res(); return; }
+      let s = WORD.slice(0, i + 1);
+      for (let j = i + 1; j < WORD.length; j++) s += rc(HEX);
+      el.textContent = s; i++;
+    }, 100);
+  });
+}
+
+/* ═══════════════════════════════════
+   COMET OVERLAY
+═══════════════════════════════════ */
+const cometOverlay = document.getElementById('comet-overlay');
+const cometCanvas  = document.getElementById('comet-canvas');
+const cCtx         = cometCanvas.getContext('2d');
+let cometAnimId    = null;
+let activeComets   = [];
+let cometBgStars   = [];
+
+const COMET_RGBS = [
+  [0,229,255],[0,229,255],[0,229,255],  // cyan — most common
+  [255,255,255],[255,255,255],           // white
+  [184,79,255],                          // violet
+  [0,200,240],                           // light cyan variant
+];
+
+function makeComet(W, H, startDelay) {
+  const speed = 4 + Math.random() * 5;
+  const ang   = (42 + Math.random() * 14) * Math.PI / 180;
+  const rgb   = COMET_RGBS[Math.floor(Math.random() * COMET_RGBS.length)];
+  return {
+    x: -80 + Math.random() * W * 0.72,
+    y: -100 - Math.random() * 260,
+    vx: Math.cos(ang) * speed,
+    vy: Math.sin(ang) * speed,
+    tailLen: 7 + Math.floor(Math.random() * 5),   // fewer, chunkier segments
+    r: rgb[0], g: rgb[1], b: rgb[2],
+    startTime: Date.now() + startDelay,
+    dead: false,
+  };
+}
+
+const G = 4;  // pixel grid size — all coords snap to this
+
+function drawOneComet(c) {
+  if (Date.now() < c.startTime) return;
+  c.x += c.vx; c.y += c.vy;
+  if (c.y > cometCanvas.height + 160) { c.dead = true; return; }
+
+  cCtx.save();
+  cCtx.shadowBlur = 0;
+
+  // Tail — distinct pixel blocks, spaced 1.8× velocity apart, snapped to grid
+  for (let i = c.tailLen; i >= 1; i--) {
+    const frac  = i / c.tailLen;          // 1 = far tail, 0 = just behind head
+    const alpha = Math.pow(1 - frac, 0.7) * 0.85;
+    const tx = Math.round((c.x - c.vx * i * 1.8) / G) * G;
+    const ty = Math.round((c.y - c.vy * i * 1.8) / G) * G;
+    // Near-head segments are 2×2 grid blocks; far ones are 1×1
+    const ps = frac < 0.4 ? G * 2 : G;
+    cCtx.fillStyle = `rgba(${c.r},${c.g},${c.b},${alpha})`;
+    cCtx.fillRect(tx, ty, ps, ps);
+  }
+
+  // Head — 3×3 grid block halo in comet colour + bright white 2×2 core
+  const hx = Math.round(c.x / G) * G;
+  const hy = Math.round(c.y / G) * G;
+
+  cCtx.shadowColor = `rgb(${c.r},${c.g},${c.b})`;
+  cCtx.shadowBlur  = 22;
+  cCtx.fillStyle   = `rgba(${c.r},${c.g},${c.b},0.65)`;
+  cCtx.fillRect(hx - G, hy - G, G * 3, G * 3);   // 3×3 coloured halo
+
+  cCtx.shadowColor = '#ffffff';
+  cCtx.shadowBlur  = 28;
+  cCtx.fillStyle   = '#ffffff';
+  cCtx.fillRect(hx, hy, G * 2, G * 2);            // 2×2 white core
+
+  cCtx.restore();
+}
+
+function animateComets() {
+  const W = cometCanvas.width, H = cometCanvas.height;
+
+  // Fade trail — semi-transparent clear
+  cCtx.fillStyle = 'rgba(0,0,14,0.22)';
+  cCtx.fillRect(0, 0, W, H);
+
+  // Static background stars
+  cometBgStars.forEach(s => {
+    cCtx.fillStyle = s.col;
+    cCtx.fillRect(s.x, s.y, s.sz, s.sz);
+  });
+
+  activeComets.forEach(c => { if (!c.dead) drawOneComet(c); });
+
+  // Respawn dead comets so the shower keeps going
+  for (let i = 0; i < activeComets.length; i++) {
+    if (activeComets[i].dead) {
+      activeComets[i] = makeComet(W, H, 100 + Math.random() * 400);
+    }
+  }
+
+  cometAnimId = requestAnimationFrame(animateComets);
+}
+
+function showCometOverlay() {
+  const W = window.innerWidth, H = window.innerHeight;
+  cometCanvas.width = W; cometCanvas.height = H;
+
+  cCtx.fillStyle = '#00000e';
+  cCtx.fillRect(0, 0, W, H);
+
+  cometBgStars = Array.from({ length: 220 }, () => ({
+    x: Math.round(Math.random() * W),
+    y: Math.round(Math.random() * H),
+    sz: Math.random() < 0.25 ? 2 : 1,
+    col: Math.random() < 0.3
+      ? (Math.random() < 0.5 ? 'rgba(100,80,200,0.7)' : 'rgba(80,60,180,0.6)')
+      : 'rgba(255,255,255,0.55)',
+  }));
+
+  activeComets = Array.from({ length: 18 }, (_, i) =>
+    makeComet(W, H, i * 150 + Math.random() * 120)
+  );
+
+  cometOverlay.style.opacity = '1';
+  animateComets();
+}
+
+function hideCometOverlay() {
+  cometOverlay.style.transition = 'opacity 0.9s ease';
+  cometOverlay.style.opacity    = '0';
+  setTimeout(() => {
+    if (cometAnimId) { cancelAnimationFrame(cometAnimId); cometAnimId = null; }
+  }, 950);
+}
+
+/* ═══════════════════════════════════
+   ACT III — PERSPECTIVE GRID
+═══════════════════════════════════ */
+const gc   = document.getElementById('grid-canvas');
+const gCtx = gc.getContext('2d');
+let gridScroll = 0;
+
+function resizeG() { gc.width = window.innerWidth; gc.height = window.innerHeight; }
+resizeG();
+window.addEventListener('resize', resizeG);
+window.addEventListener('scroll', () => {
+  gridScroll = window.scrollY - document.getElementById('act3').offsetTop;
+});
+
+(function loopGrid() {
+  const W = gc.width, H = gc.height;
+  gCtx.clearRect(0, 0, W, H);
+
+  const bg = gCtx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#000'); bg.addColorStop(0.45, '#0a0020');
+  bg.addColorStop(0.7, '#1a0035'); bg.addColorStop(1, '#0d0b1a');
+  gCtx.fillStyle = bg; gCtx.fillRect(0, 0, W, H);
+
+  const sunY = H * 0.52 + gridScroll * 0.08;
+  const sunR = Math.min(W, H) * 0.13;
+  const sg = gCtx.createLinearGradient(W/2, sunY - sunR, W/2, sunY + sunR);
+  sg.addColorStop(0, 'rgba(255,184,48,0.9)');
+  sg.addColorStop(0.4, 'rgba(255,45,120,0.8)');
+  sg.addColorStop(1, 'rgba(184,79,255,0.6)');
+  gCtx.beginPath(); gCtx.arc(W/2, sunY, sunR, 0, Math.PI * 2);
+  gCtx.fillStyle = sg; gCtx.fill();
+
+  gCtx.save(); gCtx.beginPath(); gCtx.arc(W/2, sunY, sunR, 0, Math.PI * 2); gCtx.clip();
+  for (let i = 0; i < 7; i++) {
+    const sy = sunY - sunR + (i / 7) * sunR * 2;
+    const th = Math.max(1, (i / 7) * 6);
+    gCtx.fillStyle = 'rgba(13,11,26,0.55)';
+    gCtx.fillRect(W/2 - sunR, sy + th, sunR * 2, th);
+  }
+  gCtx.restore();
+
+  const hg = gCtx.createRadialGradient(W/2, H*0.52, 0, W/2, H*0.52, W*0.5);
+  hg.addColorStop(0, 'rgba(255,45,120,0.15)');
+  hg.addColorStop(0.4, 'rgba(184,79,255,0.08)');
+  hg.addColorStop(1, 'transparent');
+  gCtx.fillStyle = hg; gCtx.fillRect(0, 0, W, H);
+
+  const horizon = H * 0.52, vx = W / 2;
+  const gOff = (gridScroll * 0.6) % 60;
+
+  for (let i = 0; i <= 24; i++) {
+    const t = i / 24, bx = t * W;
+    const al = 0.12 + (Math.abs(t - 0.5) < 0.05 ? 0.15 : 0);
+    gCtx.beginPath(); gCtx.moveTo(vx, horizon); gCtx.lineTo(bx, H);
+    const vg = gCtx.createLinearGradient(vx, horizon, bx, H);
+    vg.addColorStop(0, 'rgba(255,45,120,0)');
+    vg.addColorStop(0.3, `rgba(255,45,120,${al * 0.5})`);
+    vg.addColorStop(1, `rgba(255,45,120,${al})`);
+    gCtx.strokeStyle = vg; gCtx.lineWidth = 1; gCtx.stroke();
+  }
+
+  for (let i = 1; i <= 14; i++) {
+    const pr = (i + gOff / 60) / 14;
+    const ea = Math.pow(pr, 2.2);
+    const y  = horizon + ea * (H - horizon);
+    const al = 0.08 + pr * 0.22;
+    gCtx.beginPath(); gCtx.moveTo(0, y); gCtx.lineTo(W, y);
+    const lg = gCtx.createLinearGradient(0, y, W, y);
+    lg.addColorStop(0, 'transparent');
+    lg.addColorStop(0.3, `rgba(0,229,255,${al})`);
+    lg.addColorStop(0.5, `rgba(255,45,120,${al * 1.4})`);
+    lg.addColorStop(0.7, `rgba(0,229,255,${al})`);
+    lg.addColorStop(1, 'transparent');
+    gCtx.strokeStyle = lg; gCtx.lineWidth = 1; gCtx.stroke();
+  }
+
+  requestAnimationFrame(loopGrid);
+})();
+
+/* ═══════════════════════════════════
+   ACT IV — FREQUENCY WAVES
+═══════════════════════════════════ */
+const fc   = document.getElementById('freq-canvas');
+const fCtx = fc.getContext('2d');
+let freqT  = 0;
+
+function resizeF() { fc.width = window.innerWidth; fc.height = window.innerHeight; }
+resizeF();
+window.addEventListener('resize', resizeF);
+
+(function loopFreq() {
+  const W = fc.width, H = fc.height, mid = H / 2;
+  fCtx.clearRect(0, 0, W, H);
+  freqT += 0.012;
+
+  const waves = [
+    { col:'#00e5ff', amp:H*0.09, freq:0.008, ph:freqT,       blur:12, al:0.7,  lw:2   },
+    { col:'#ff2d78', amp:H*0.07, freq:0.011, ph:freqT * 1.3, blur:10, al:0.6,  lw:1.5 },
+    { col:'#b84fff', amp:H*0.04, freq:0.016, ph:freqT * 0.7, blur:8,  al:0.35, lw:1   },
+  ];
+
+  waves.forEach(wv => {
+    fCtx.save();
+    fCtx.shadowColor = wv.col; fCtx.shadowBlur = wv.blur;
+    fCtx.beginPath();
+    for (let x = 0; x <= W; x += 2) {
+      const noise = Math.sin(x * 0.03 + wv.ph * 3) * wv.amp * 0.18;
+      const y = mid + Math.sin(x * wv.freq + wv.ph) * wv.amp + noise;
+      x === 0 ? fCtx.moveTo(x, y) : fCtx.lineTo(x, y);
+    }
+    const lg = fCtx.createLinearGradient(0, 0, W, 0);
+    lg.addColorStop(0, 'transparent'); lg.addColorStop(0.1, wv.col);
+    lg.addColorStop(0.9, wv.col); lg.addColorStop(1, 'transparent');
+    fCtx.strokeStyle = lg; fCtx.globalAlpha = wv.al; fCtx.lineWidth = wv.lw; fCtx.stroke();
+    fCtx.restore();
+  });
+
+  requestAnimationFrame(loopFreq);
+})();
+
+/* ═══════════════════════════════════
+   INTERSECTION OBSERVER — scroll reveals
+═══════════════════════════════════ */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ═══════════════════════════════════
+   MAIN AUTOMATIC TIMELINE
+═══════════════════════════════════ */
+async function mainTimeline() {
+  // ── ACT 1 ──────────────────────
+  await runBoot();
+  await delay(450);
+  logoEl.classList.add('show');
+  await delay(400);   // logo fades in
+  await runAct1Scramble(document.getElementById('act1-cipher'));
+  await delay(1800);  // linger after scramble resolves
+
+  // ── ACT 2 ──────────────────────
+  document.getElementById('act2').scrollIntoView({ behavior: 'smooth' });
+  await delay(600);   // scroll settles + IO fires reveals
+  await delay(800);   // all reveal animations finish
+
+  await runAct2Scramble(document.getElementById('act2-cipher'));
+  await delay(800);   // enjoy Act 2
+
+  // ── COMET TRANSITION ───────────
+  showCometOverlay();
+  await delay(300);
+  // Instantly reposition under the opaque overlay
+  window.scrollTo({ top: document.getElementById('act3').offsetTop });
+  await delay(2200);  // comet shower duration
+  hideCometOverlay();
+  await delay(700);   // overlay fades out → Act 3 visible
+
+  // ── ACT 3 ──────────────────────
+  await delay(1400);  // enjoy synthwave grid
+
+  // ── ACT 4 ──────────────────────
+  document.getElementById('act4').scrollIntoView({ behavior: 'smooth' });
+  // IntersectionObserver handles Act 4 reveals automatically
+}
+
+mainTimeline();
+</script>
+</body>
+</html>
