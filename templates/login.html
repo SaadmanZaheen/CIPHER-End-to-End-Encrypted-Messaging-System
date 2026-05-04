@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Login — CIPHER{% endblock %}
+{% block body_class %}auth-bg{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+  <div class="col-sm-10 col-md-6 col-lg-5">
+
+    <div class="text-center mb-4 fade-up">
+      <div style="margin-bottom:10px">
+        <span class="cipher-logo" style="font-family:var(--pixel);font-size:1.3rem;letter-spacing:0.12em">CIPHER</span>
+      </div>
+      <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);letter-spacing:0.1em">END·TO·END · ENCRYPTED · MESSAGING</div>
+    </div>
+
+    <div class="card card-accent">
+      <div class="card-body p-4">
+        <div class="text-center mb-4 pb-3" style="border-bottom:1px solid var(--border)">
+          <span class="section-label" style="color:var(--cyan)">AUTHENTICATION</span>
+          <h2 class="mt-2 mb-0" style="font-size:0.8rem">Log In</h2>
+        </div>
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" required autofocus autocomplete="username">
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2">LOG IN</button>
+        </form>
+        <p class="text-center mt-4 mb-0" style="font-family:var(--mono);font-size:0.75rem;color:var(--muted)">
+          No account? <a href="{{ url_for('auth.register') }}" style="color:var(--cyan);text-decoration:none">Register</a>
+        </p>
+        <p class="text-center mt-2 mb-0">
+          <a href="{{ url_for('index') }}" style="font-family:var(--mono);font-size:0.68rem;color:var(--dim);text-decoration:none">← Back to home</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

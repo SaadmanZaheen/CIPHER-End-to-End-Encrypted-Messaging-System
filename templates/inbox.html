@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Inbox — CIPHER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-4 fade-in" style="animation-delay: 0.05s;">
+  <div>
+    <div class="section-tag">MESSAGES</div>
+    <h2 class="page-title mb-0">INBOX</h2>
+  </div>
+  <a href="{{ url_for('social.friends') }}" class="btn btn-outline-secondary btn-sm">NETWORK</a>
+</div>
+
+{% if not friends_list %}
+  <div class="card text-center p-5 fade-in" style="animation-delay: 0.15s; border-style: dashed; border-color: rgba(255,255,255,0.08);">
+    <div class="card-body">
+      <span class="cipher-logo" style="font-family:var(--pixel);font-size:1.0rem;letter-spacing:0.12em;display:block;text-align:center;margin:0 auto 0.75rem;opacity:0.45;">CIPHER</span>
+      <h4 style="font-size: 0.58rem; color: var(--dim); margin-bottom: 0.5rem;">NO CONVERSATIONS YET</h4>
+      <p style="font-family: var(--mono); font-size: 0.8rem; color: var(--dim); margin-bottom: 1.25rem; line-height: 1.7;">
+        Connect with people to start encrypted messaging.
+      </p>
+      <a href="{{ url_for('social.user_list') }}" class="btn btn-primary btn-sm">DISCOVER PEOPLE</a>
+    </div>
+  </div>
+{% else %}
+  <div class="card card-accent fade-in" style="animation-delay: 0.15s;">
+    <div style="padding: 10px 16px; border-bottom: 1px solid var(--border);">
+      <span style="font-family: var(--pixel); font-size: 0.42rem; color: var(--muted); letter-spacing: 0.12em;">ACTIVE CHANNELS</span>
+    </div>
+    {% set av_classes = ['avatar-cyan','avatar-magenta','avatar-violet','avatar-amber'] %}
+    <div class="list-group list-group-flush">
+      {% for item in friends_list %}
+      <a href="{{ url_for('social.conversation', friend_id=item.u.id) }}"
+         class="list-group-item list-group-item-action d-flex align-items-center p-3 text-decoration-none"
+         style="background: transparent; border-bottom: 1px solid rgba(255,255,255,0.04); color: inherit;">
+
+        <div style="position: relative; margin-right: 0.85rem; flex-shrink: 0;">
+          <div class="avatar {{ av_classes[loop.index0 % 4] }}" style="width: 48px; height: 48px; border-radius: 4px; font-size: 0.85rem;">
+            {{ item.u.username[0] | upper }}
+          </div>
+          {% if item.unread > 0 %}
+          <span style="position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px;
+                       background: var(--magenta); border-radius: 2px; font-family: var(--pixel); font-size: 0.38rem;
+                       color: #fff; display: flex; align-items: center; justify-content: center;
+                       padding: 0 4px; box-shadow: var(--glow-m);">
+            {{ item.unread }}
+          </span>
+          {% endif %}
+        </div>
+
+        <div style="flex: 1; min-width: 0;">
+          <div class="d-flex justify-content-between align-items-center">
+            <span style="font-family: var(--pixel); font-size: 0.58rem; color: var(--text); line-height: 1.5;">
+              {{ item.u.username }}
+            </span>
+            {% if item.unread > 0 %}
+              <span class="badge badge-fail">{{ item.unread }} new</span>
+            {% else %}
+              <span style="font-family: var(--mono); font-size: 0.62rem; color: var(--dim);">OPEN →</span>
+            {% endif %}
+          </div>
+          <div style="font-family: var(--mono); font-size: 0.7rem; color: var(--green); margin-top: 5px; display: flex; align-items: center; gap: 5px;">
+            <span style="color: var(--green); font-size: 0.5rem;">■</span>
+            E2E ENCRYPTED
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

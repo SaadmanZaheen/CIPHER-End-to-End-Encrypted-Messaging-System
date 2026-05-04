@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}New Post — CIPHER{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-7">
+    <div class="mb-4 fade-in" style="animation-delay: 0.05s;">
+      <div class="section-tag">COMPOSE</div>
+      <h2 class="page-title mb-0">NEW POST</h2>
+    </div>
+    <div class="card card-magenta fade-in" style="animation-delay: 0.1s;">
+      <div class="card-body p-4">
+        <p style="font-family: var(--mono); font-size: 0.75rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.7;">
+          Post will be <span style="color: var(--cyan);">RSA-encrypted</span> and <span style="color: var(--violet);">ECDSA-signed</span> before storage.
+        </p>
+        <form method="POST" action="{{ url_for('posts.new_post') }}">
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" required autofocus
+                   style="font-family: var(--pixel); font-size: 0.6rem; color: var(--cyan); letter-spacing: 0.04em;">
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Content</label>
+            <textarea name="content" class="form-control" rows="7" required></textarea>
+          </div>
+          <hr style="border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,45,120,0.25), transparent); opacity: 1;">
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="d-flex align-items-center" style="gap: 8px;">
+              <input type="hidden" id="np-encrypt" name="encrypt_post" value="1">
+              <div class="toggle-row" id="np-toggle-wrap" style="cursor: pointer; margin: 0;">
+                <div class="toggle-track on" id="np-toggle-track"><div class="toggle-thumb"></div></div>
+                <span class="toggle-label">
+                  <span style="font-family: var(--pixel); font-size: 0.42rem; color: var(--cyan); margin-right: 6px; text-shadow: var(--glow-c);">RSA+ECC</span>encrypt
+                </span>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('posts.feed') }}" class="btn btn-outline-secondary btn-sm">CANCEL</a>
+              <button type="submit" class="btn btn-danger">PUBLISH →</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const npInput = document.getElementById('np-encrypt');
+  const npTrack = document.getElementById('np-toggle-track');
+  const npWrap  = document.getElementById('np-toggle-wrap');
+  let   npOn    = true;
+  npWrap.addEventListener('click', () => {
+    npOn = !npOn;
+    npInput.value = npOn ? '1' : '';
+    npTrack.className = 'toggle-track ' + (npOn ? 'on' : 'off');
+  });
+</script>
+{% endblock %}

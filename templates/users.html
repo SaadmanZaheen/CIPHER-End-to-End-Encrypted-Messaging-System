@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Discover — CIPHER{% endblock %}
+{% block content %}
+<div class="mb-4 fade-in" style="animation-delay: 0.05s;">
+  <div class="section-tag">DISCOVER</div>
+  <h2 class="page-title mb-0">FIND PEOPLE</h2>
+</div>
+
+{% if not entries %}
+  <div class="card text-center p-5 fade-in" style="animation-delay: 0.15s; border-color: rgba(0,229,255,0.08);">
+    <div class="card-body">
+      <span class="cipher-logo" style="font-family:var(--pixel);font-size:1.0rem;letter-spacing:0.12em;display:block;text-align:center;margin:0 auto 0.75rem;opacity:0.45;">CIPHER</span>
+      <span class="section-label d-block mb-2">EMPTY</span>
+      <p style="color: var(--dim); font-size: 0.875rem; margin: 0;">No other creators registered yet.</p>
+    </div>
+  </div>
+{% endif %}
+
+{% set av_classes = ['avatar-cyan','avatar-magenta','avatar-violet','avatar-amber'] %}
+<div class="row">
+  {% for e in entries %}
+  <div class="col-md-6 col-lg-4 mb-4 fade-in" style="animation-delay: {{ 0.1 + (loop.index * 0.055) }}s;">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column align-items-center text-center p-4">
+
+        <div class="avatar {{ av_classes[loop.index0 % 4] }}" style="width: 64px; height: 64px; border-radius: 6px; font-size: 1.05rem; margin-bottom: 1rem;">
+          {{ e.username[0] | upper }}
+        </div>
+
+        <h3 style="font-family: var(--pixel); font-size: 0.65rem; color: var(--text); margin-bottom: 0.5rem; line-height: 1.7;">
+          <a href="{{ url_for('social.user_profile', target_id=e.id) }}"
+             style="color: inherit; text-decoration: none;">{{ e.username }}</a>
+        </h3>
+
+        <div class="mb-4">
+          {% if e.role == 'admin' %}
+            <span class="badge bg-warning">ADMIN</span>
+          {% else %}
+            <span class="badge bg-secondary">CREATOR</span>
+          {% endif %}
+        </div>
+
+        <div class="mt-auto w-100">
+          {% if e.status == 'accepted' %}
+            <div class="d-flex gap-2">
+              <span class="btn btn-sm w-50 disabled"
+                    style="background: rgba(0,229,255,0.07); color: var(--cyan);
+                           border: 1px solid rgba(0,229,255,0.18); font-size: 0.75rem; pointer-events: none;">
+                Connected
+              </span>
+              <a href="{{ url_for('social.conversation', friend_id=e.id) }}"
+                 class="btn btn-sm btn-primary w-50">Message</a>
+            </div>
+          {% elif e.status == 'pending' and e.is_requester %}
+            <button class="btn btn-sm w-100 disabled"
+                    style="background: rgba(255,255,255,0.04); color: var(--dim);
+                           border: 1px solid rgba(255,255,255,0.08);">Pending</button>
+          {% elif e.status == 'pending' and not e.is_requester %}
+            <a href="{{ url_for('social.friends') }}" class="btn btn-sm btn-success w-100">Review Request</a>
+          {% elif e.status == 'rejected' %}
+            <button class="btn btn-sm w-100 disabled"
+                    style="background: rgba(255,45,120,0.07); color: var(--magenta);
+                           border: 1px solid rgba(255,45,120,0.18);">Declined</button>
+          {% else %}
+            <form method="post" action="{{ url_for('social.friend_request', target_id=e.id) }}">
+              <button class="btn btn-sm btn-outline-primary w-100">Connect</button>
+            </form>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

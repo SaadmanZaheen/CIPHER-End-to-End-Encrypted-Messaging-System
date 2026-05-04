@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Environment variables
+.env
+*.env
+
+# Database files 
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE / OS
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+flask_session/
+
+
+# Auto-generated runtime files
+server_keys.json
+app.db
+
+# Local tooling — never commit
+.hidden/
+Context/
+*_context.md
+cloudflared.exe
+cloudflared.log
+config.yml
+
+# Node (not part of Python project)
+node_modules/
+package.json
+package-lock.json
+
+# Static export files
+CIPHER.html
+landing.html

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Verify 2FA — SecureConnect{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+  <div class="col-sm-9 col-md-5 col-lg-4">
+    <div class="card text-center" style="border-color: rgba(184,79,255,0.2);">
+      <div class="card-body p-4">
+        <span class="section-label" style="color: var(--violet); letter-spacing: 2px;">2FA VERIFY</span>
+        <h2 class="mt-2 mb-3">Enter Code</h2>
+        <p style="font-size: 0.85rem; color: var(--dim); margin-bottom: 1.5rem;">
+          6-digit code from your authenticator app
+        </p>
+        <form method="POST" action="{{ url_for('auth.verify_otp') }}">
+          <div class="mb-4">
+            <input type="text" name="token" class="form-control text-center"
+                   maxlength="6" pattern="\d{6}" placeholder="000000" required autofocus
+                   style="font-size: 1.6rem; letter-spacing: 0.6rem; text-align: center;">
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2">Verify</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

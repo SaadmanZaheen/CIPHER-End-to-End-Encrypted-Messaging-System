@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Edit Post — CIPHER{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-7">
+    <div class="mb-4 fade-in" style="animation-delay: 0.05s;">
+      <div class="section-tag" style="color: var(--violet); border-color: rgba(184,79,255,0.3); box-shadow: 0 0 8px rgba(184,79,255,0.15);">EDIT</div>
+      <h2 class="page-title mb-0" style="color: var(--violet); text-shadow: var(--glow-v);">EDIT POST</h2>
+    </div>
+    <div class="card fade-in" style="animation-delay: 0.1s; border-color: rgba(184,79,255,0.2); box-shadow: 0 0 24px rgba(184,79,255,0.05);">
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('posts.edit_post', post_id=post_id) }}">
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" value="{{ title }}" required
+                   style="font-family: var(--pixel); font-size: 0.6rem; color: var(--cyan); letter-spacing: 0.04em;">
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Content</label>
+            <textarea name="content" class="form-control" rows="7" required>{{ content }}</textarea>
+          </div>
+          <hr style="border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(184,79,255,0.25), transparent); opacity: 1;">
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="d-flex align-items-center" style="gap: 8px;">
+              <input type="hidden" id="ep-encrypt" name="encrypt_post" value="1">
+              <div class="toggle-row" id="ep-toggle-wrap" style="cursor: pointer; margin: 0;">
+                <div class="toggle-track on" id="ep-toggle-track"><div class="toggle-thumb"></div></div>
+                <span class="toggle-label">
+                  <span style="font-family: var(--pixel); font-size: 0.42rem; color: var(--cyan); margin-right: 6px; text-shadow: var(--glow-c);">RSA+ECC</span>encrypt
+                </span>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('posts.view_post', post_id=post_id) }}" class="btn btn-outline-secondary btn-sm">CANCEL</a>
+              <button type="submit" class="btn btn-warning btn-sm">SAVE →</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const epInput = document.getElementById('ep-encrypt');
+  const epTrack = document.getElementById('ep-toggle-track');
+  const epWrap  = document.getElementById('ep-toggle-wrap');
+  let   epOn    = true;
+  epWrap.addEventListener('click', () => {
+    epOn = !epOn;
+    epInput.value = epOn ? '1' : '';
+    epTrack.className = 'toggle-track ' + (epOn ? 'on' : 'off');
+  });
+</script>
+{% endblock %}

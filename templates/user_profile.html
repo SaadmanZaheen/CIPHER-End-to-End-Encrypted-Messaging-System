@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ target.username }} — CIPHER{% endblock %}
+{% block content %}
+<div class="row">
+
+  <!-- Profile sidebar -->
+  <div class="col-md-4 mb-4 fade-in" style="animation-delay: 0.05s;">
+    <div class="card card-magenta">
+      <div class="card-body text-center py-4 px-3">
+        <div class="avatar avatar-violet" style="width: 68px; height: 68px; border-radius: 6px;
+             font-size: 1.1rem; margin: 0 auto 1rem;">
+          {{ target.username[0] | upper }}
+        </div>
+
+        <h3 style="font-family: var(--pixel); font-size: 0.68rem; color: var(--text); margin-bottom: 0.5rem; line-height: 1.7;">
+          {{ target.username }}
+        </h3>
+        <div class="mb-3">
+          {% if target.role == 'admin' %}
+            <span class="badge bg-warning">ADMIN</span>
+          {% else %}
+            <span class="badge bg-secondary">CREATOR #{{ target.id }}</span>
+          {% endif %}
+        </div>
+
+        <hr>
+
+        <div class="d-flex flex-column gap-2 mt-3">
+          {% if status == 'accepted' %}
+            <span class="badge badge-ok py-2">CONNECTED</span>
+            <a href="{{ url_for('social.conversation', friend_id=target.id) }}"
+               class="btn btn-primary btn-sm">MSG →</a>
+          {% elif status == 'pending' and is_requester %}
+            <span class="badge badge-v py-2">REQUEST SENT</span>
+          {% elif status == 'pending' and not is_requester %}
+            <a href="{{ url_for('social.friends') }}" class="btn btn-success btn-sm">REVIEW REQUEST</a>
+          {% elif status == 'rejected' %}
+            <span class="badge badge-fail py-2">DECLINED</span>
+          {% else %}
+            <form method="post" action="{{ url_for('social.friend_request', target_id=target.id) }}">
+              <button class="btn btn-outline-primary w-100">CONNECT</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Posts column -->
+  <div class="col-md-8 fade-in" style="animation-delay: 0.1s;">
+    <span class="section-label mb-3 d-block" style="color: var(--cyan);">POSTS BY {{ target.username | upper }}</span>
+
+    {% if not posts %}
+      <div class="card text-center p-4" style="border-style: dashed; border-color: rgba(255,255,255,0.08);">
+        <p style="font-family: var(--mono); color: var(--dim); margin: 0; font-size: 0.82rem;">No posts yet.</p>
+      </div>
+    {% endif %}
+
+    {% for post in posts %}
+    <div class="card mb-3">
+      <div class="card-body">
+        {% if post.is_locked %}
+          <h4 style="font-family: var(--pixel); font-size: 0.6rem; color: var(--dim); filter: blur(3px); user-select: none;
+                     margin-bottom: 0.65rem; line-height: 1.7;">{{ post.title }}</h4>
+          <p style="font-size: 0.875rem; color: var(--dim); filter: blur(5px); user-select: none;
+                    margin-bottom: 0.75rem; line-height: 1.6;">{{ post.content }}…</p>
+          <span class="badge badge-fail">ENCRYPTED</span>
+        {% else %}
+          <h4 style="font-family: var(--pixel); font-size: 0.6rem; color: var(--cyan); margin-bottom: 0.75rem;
+                     line-height: 1.8; text-shadow: 0 0 6px rgba(0,229,255,0.15);">
+            {{ post.title }}
+          </h4>
+          <p style="font-size: 0.875rem; color: var(--text); white-space: pre-wrap; line-height: 1.75;">
+            {{ post.content }}
+          </p>
+        {% endif %}
+      </div>
+      <div class="card-footer" style="font-family: var(--mono); font-size: 0.68rem; color: var(--dim);">
+        {{ post.created_at }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

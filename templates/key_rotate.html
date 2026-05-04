@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Key Management — SecureConnect{% endblock %}
+{% block content %}
+<div class="mb-4 fade-in" style="animation-delay: 0.05s;">
+  <span class="section-label">CRYPTOGRAPHY</span>
+  <h2 class="mb-0">Key Management</h2>
+</div>
+
+<div class="row">
+  <div class="col-md-6 mb-4 fade-in" style="animation-delay: 0.1s;">
+    <div class="card h-100" style="border-color: rgba(255,45,120,0.15);">
+      <div class="card-body p-4">
+        <span class="section-label mb-3 d-block" style="color: var(--magenta);">ROTATE KEYS</span>
+        <p style="font-size: 0.875rem; color: var(--dim); line-height: 1.7; margin-bottom: 1rem;">
+          Generates a fresh RSA-256 keypair and ECC P-192 keypair. The old keypair is archived. Session token is re-issued automatically.
+        </p>
+        <div class="alert alert-warning py-2" style="font-size: 0.8rem; margin-bottom: 1.25rem;">
+          <strong>Warning:</strong> Posts encrypted with your old key can no longer be decrypted after rotation.
+        </div>
+        <form method="POST" action="{{ url_for('auth.key_rotate') }}"
+              onsubmit="return confirm('Rotate your keypairs? Old posts will be unreadable.')">
+          <button type="submit" class="btn btn-danger">Rotate Keys</button>
+          <a href="{{ url_for('auth.key_history') }}" class="btn btn-outline-secondary ms-2">History</a>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-4 fade-in" style="animation-delay: 0.15s;">
+    <div class="card h-100" style="border-color: rgba(0,229,255,0.12);">
+      <div class="card-body p-4">
+        <span class="section-label mb-3 d-block" style="color: var(--cyan);">CURRENT KEYS</span>
+        <div style="background: rgba(0,229,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+                    border-radius: var(--card-r); padding: 1rem; margin-bottom: 1rem;">
+          <div class="mb-3">
+            <span class="section-label" style="color: var(--dim);">RSA-256 (n)</span>
+            <div style="font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--cyan);
+                        margin-top: 4px; word-break: break-all;">
+              {{ user.rsa_pub[0] | string | truncate(44, True, '…') }}
+            </div>
+          </div>
+          <hr>
+          <div>
+            <span class="section-label" style="color: var(--dim);">ECC P-192 (x)</span>
+            <div style="font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--violet);
+                        margin-top: 4px; word-break: break-all;">
+              {{ user.ecc_pub[0] | string | truncate(44, True, '…') }}
+            </div>
+          </div>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--dim); margin: 0;">
+          Key version: <strong style="color: var(--text);">{{ history | length }}</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<span class="section-label mb-3 d-block fade-in" style="animation-delay: 0.2s;">ROTATION HISTORY</span>
+
+{% if not history %}
+  <div class="alert alert-info fade-in" style="animation-delay: 0.25s;">No rotation history yet.</div>
+{% else %}
+<div class="card fade-in" style="animation-delay: 0.25s;">
+  <div class="card-body p-0">
+    <table class="table table-sm mb-0">
+      <thead>
+        <tr>
+          <th>Ver</th>
+          <th>RSA Public n</th>
+          <th>ECC Public x</th>
+          <th>Archived At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for k in history %}
+        <tr>
+          <td style="font-family: 'DM Mono', monospace; color: var(--cyan); font-size: 0.8rem;">v{{ k['key_version'] }}</td>
+          <td><code style="font-size: 0.72rem;">{{ k['rsa_pub'].split('|')[0][:28] }}…</code></td>
+          <td><code style="font-size: 0.72rem; color: var(--violet);">{{ k['ecc_pub'].split('|')[0][:28] }}…</code></td>
+          <td style="font-size: 0.78rem; color: var(--dim);">{{ k['created_at'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

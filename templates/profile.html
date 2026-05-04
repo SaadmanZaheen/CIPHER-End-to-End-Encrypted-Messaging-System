@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Profile — CIPHER{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-7">
+    <div class="mb-4 fade-in" style="animation-delay: 0.05s;">
+      <div class="section-tag">ACCOUNT</div>
+      <h2 class="page-title mb-0">MY PROFILE</h2>
+    </div>
+
+    <!-- Identity card -->
+    <div class="card card-magenta fade-in" style="animation-delay: 0.1s;">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-4" style="gap: 1rem;">
+          <div class="avatar avatar-violet" style="width: 56px; height: 56px; border-radius: 6px; font-size: 1rem; flex-shrink: 0;">
+            {{ user.username[0] | upper }}
+          </div>
+          <div>
+            <div style="font-family: var(--pixel); font-size: 0.72rem; color: var(--text); margin-bottom: 8px; text-shadow: 0 0 8px rgba(184,79,255,0.2);">
+              {{ user.username }}
+            </div>
+            <div class="d-flex gap-1 flex-wrap">
+              {% if user.role == 'admin' %}
+                <span class="badge bg-warning">ADMIN</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ user.role | upper }}</span>
+              {% endif %}
+              {% if user.mac_valid %}
+                <span class="badge badge-ok">MAC ✓</span>
+              {% else %}
+                <span class="badge badge-fail">MAC ✘</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Key display -->
+        <div style="background: rgba(0,229,255,0.03); border: 1px solid rgba(0,229,255,0.18);
+                    border-radius: 6px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 0 16px rgba(0,229,255,0.04);">
+          <div class="mb-3">
+            <span class="section-label" style="color: var(--cyan); letter-spacing: 0.1em;">RSA-256 PUBLIC KEY (n)</span>
+            <div style="font-family: var(--mono); font-size: 0.78rem; color: var(--cyan);
+                        margin-top: 6px; word-break: break-all; line-height: 1.6; text-shadow: 0 0 6px rgba(0,229,255,0.2);">
+              {{ user.rsa_pub[0] | string | truncate(52) }}
+            </div>
+          </div>
+          <hr>
+          <div>
+            <span class="section-label" style="color: var(--violet); letter-spacing: 0.1em;">ECC P-192 PUBLIC KEY (x)</span>
+            <div style="font-family: var(--mono); font-size: 0.78rem; color: var(--violet);
+                        margin-top: 6px; word-break: break-all; line-height: 1.6; text-shadow: 0 0 6px rgba(184,79,255,0.2);">
+              {{ user.ecc_pub[0] | string | truncate(52) }}
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('auth.key_rotate') }}" class="btn btn-outline-warning btn-sm">KEY ROTATION</a>
+          <a href="{{ url_for('auth.key_history') }}" class="btn btn-outline-secondary btn-sm">KEY HISTORY</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit info -->
+    <div class="card fade-in" style="animation-delay: 0.15s; border-color: rgba(184,79,255,0.15);">
+      <div class="card-body p-4">
+        <span class="section-label mb-3 d-block" style="color: var(--violet);">EDIT INFO</span>
+        <form method="POST" action="{{ url_for('auth.profile') }}">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Contact</label>
+            <input type="text" name="contact" class="form-control" value="{{ user.contact }}" required>
+          </div>
+          <button type="submit" class="btn btn-primary">SAVE CHANGES</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
