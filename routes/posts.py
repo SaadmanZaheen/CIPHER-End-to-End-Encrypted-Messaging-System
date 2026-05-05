@@ -13,11 +13,6 @@ from crypto.rsa import encrypt as rsa_encrypt, decrypt as rsa_decrypt
 posts_bp = Blueprint('posts', __name__)
 
 
-def _post_encrypt(text, shared_key_pub):
-    """Encrypt post content with recipient's RSA public key (Req 9/10)."""
-    return rsa_encrypt(text, shared_key_pub)
-
-
 def _post_decrypt(ciphertext, rsa_priv):
     if ciphertext.startswith('[UNENCRYPTED]'):
         return ciphertext.replace('[UNENCRYPTED]', '', 1)
@@ -97,8 +92,8 @@ def new_post(user):
         return render_template('new_post.html', user=user)
 
     if encrypt_post:
-        title_enc   = _post_encrypt(title,   user.rsa_pub)
-        content_enc = _post_encrypt(content, user.rsa_pub)
+        title_enc   = rsa_encrypt(title,   user.rsa_pub)
+        content_enc = rsa_encrypt(content, user.rsa_pub)
         ecc_sig = ecdsa_sign(title_enc + content_enc, user.get_ecc_priv())
     else:
         title_enc   = f"[UNENCRYPTED]{title}"

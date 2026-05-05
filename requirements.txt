@@ -1,4 +1,3 @@
 flask
-sympy
 gunicorn
 psycopg2-binary

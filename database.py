@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import json
+import re
 import secrets
 from crypto.rsa import generate_keypair, encrypt, decrypt
 from crypto.mac import generate_mac, verify_mac
@@ -11,38 +12,51 @@ try:
 except ImportError:
     psycopg2 = None
 
-DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
-if DATABASE_URL.startswith('"') and DATABASE_URL.endswith('"'):
-    DATABASE_URL = DATABASE_URL[1:-1]
-if DATABASE_URL.startswith("'") and DATABASE_URL.endswith("'"):
-    DATABASE_URL = DATABASE_URL[1:-1]
-# Fix postgres:// to postgresql:// for compatibility if needed
+# ── Database connection config ────────────────────────────────────────────────
+#
+# Priority order:
+#   1. DATABASE_URL env var  → PostgreSQL (e.g. Supabase or Render Postgres)
+#   2. DATA_DIR env var      → SQLite file in a persistent directory
+#   3. Default               → SQLite "app.db" in the project root
+#
+# On Render's free tier, the filesystem resets on every deploy, so you MUST
+# set DATABASE_URL to a persistent PostgreSQL URL to keep your data.
+
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip().strip('"').strip("'")
 if DATABASE_URL.startswith('postgres://'):
     DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
 
-# If DATA_DIR is set in environment, use it for persistent storage (e.g. on Render)
-DATA_DIR = os.environ.get('DATA_DIR', '')
-DB_PATH = os.path.join(DATA_DIR, 'app.db') if DATA_DIR else 'app.db'
+DATA_DIR         = os.environ.get('DATA_DIR', '')
+DB_PATH          = os.path.join(DATA_DIR, 'app.db')    if DATA_DIR else 'app.db'
 SERVER_KEYS_PATH = os.path.join(DATA_DIR, 'server_keys.json') if DATA_DIR else 'server_keys.json'
 
+
+# ── Server-side RSA + MAC key management ─────────────────────────────────────
+# The server keeps its own RSA keypair and MAC key to encrypt/decrypt sensitive
+# database fields (usernames, emails, private keys, etc.).
+
 def _init_server_keys():
-    if os.environ.get('RSA_PUB_N'): return
+    """Generate and save server keys if they don't exist yet."""
+    if os.environ.get('RSA_PUB_N'):
+        return  # keys are provided via environment variables
     if not os.path.exists(SERVER_KEYS_PATH):
         pub, priv = generate_keypair(bits=256)
         data = {
             'rsa_pub':  [pub[0],  pub[1]],
             'rsa_priv': [priv[0], priv[1]],
-            'mac_key':  secrets.token_hex(32)
+            'mac_key':  secrets.token_hex(32),
         }
         with open(SERVER_KEYS_PATH, 'w') as f:
             json.dump(data, f)
 
+
 def _load_server_keys():
+    """Load server keys from environment variables or the JSON file."""
     if os.environ.get('RSA_PUB_N'):
         return {
-            'rsa_pub': [int(os.environ.get('RSA_PUB_N')), int(os.environ.get('RSA_PUB_E'))],
-            'rsa_priv': [int(os.environ.get('RSA_PRIV_N')), int(os.environ.get('RSA_PRIV_D'))],
-            'mac_key': os.environ.get('MAC_KEY')
+            'rsa_pub':  [int(os.environ['RSA_PUB_N']), int(os.environ['RSA_PUB_E'])],
+            'rsa_priv': [int(os.environ['RSA_PRIV_N']), int(os.environ['RSA_PRIV_D'])],
+            'mac_key':  os.environ['MAC_KEY'],
         }
     with open(SERVER_KEYS_PATH, 'r') as f:
         return json.load(f)
@@ -62,7 +76,8 @@ def get_mac_key():
     return _load_server_keys()['mac_key']
 
 
-# ── Field-level encrypt/decrypt using server RSA key ─────────────────────────
+# ── Field-level encryption (server RSA key) ───────────────────────────────────
+# Used to encrypt sensitive user fields (username, email, contact) in the DB.
 
 def field_encrypt(plaintext):
     return encrypt(str(plaintext), get_server_rsa_pub())
@@ -73,6 +88,7 @@ def field_decrypt(ciphertext):
 
 
 # ── Key serialization helpers ─────────────────────────────────────────────────
+# RSA and ECC keys are stored as "n|e" / "n|d" / "x|y" pipe-separated strings.
 
 def serialize_rsa_pub(pub):
     return f"{pub[0]}|{pub[1]}"
@@ -93,42 +109,50 @@ def deserialize_ecc_pub(s):
 
 
 def encrypt_private_key(key_int):
+    """Encrypt an integer private key (ECC) with the server RSA key."""
     return encrypt(str(key_int), get_server_rsa_pub())
 
 
 def decrypt_private_key(enc_str):
+    """Decrypt an encrypted integer private key (ECC)."""
     return int(decrypt(enc_str, get_server_rsa_priv()))
 
 
 def encrypt_rsa_priv(priv):
-    # priv = (n, d) — encrypt d; n is public
+    """Encrypt an RSA private key tuple (n, d) as a single encrypted string."""
     return encrypt(f"{priv[0]}|{priv[1]}", get_server_rsa_pub())
 
 
 def decrypt_rsa_priv(enc_str):
+    """Decrypt an RSA private key back into (n, d)."""
     raw = decrypt(enc_str, get_server_rsa_priv())
     n, d = raw.split('|')
     return (int(n), int(d))
 
 
-# ── DB connection ─────────────────────────────────────────────────────────────
+# ── Database connection ───────────────────────────────────────────────────────
 
 class DBCursor:
+    """
+    Thin wrapper around a database cursor that smooths over the differences
+    between SQLite (uses ?) and PostgreSQL (uses %s, needs RETURNING id).
+    """
     def __init__(self, conn, is_pg):
-        self.conn = conn
-        self.is_pg = is_pg
-        if is_pg:
-            self.cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        else:
-            self.cursor = conn.cursor()
+        self.conn   = conn
+        self.is_pg  = is_pg
+        self.cursor = (conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                       if is_pg else conn.cursor())
         self.lastrowid = None
 
     def execute(self, query, params=()):
         if self.is_pg:
-            import re
             query = query.replace('?', '%s')
             query = query.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'SERIAL PRIMARY KEY')
-            query = re.sub(r'TEXT\s+NOT NULL DEFAULT CURRENT_TIMESTAMP', 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP', query)
+            query = re.sub(
+                r'TEXT\s+NOT NULL DEFAULT CURRENT_TIMESTAMP',
+                'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
+                query
+            )
             is_insert = query.strip().upper().startswith('INSERT')
             if is_insert and 'RETURNING id' not in query:
                 query += ' RETURNING id'
@@ -147,9 +171,11 @@ class DBCursor:
     def fetchall(self):
         return self.cursor.fetchall()
 
+
 class DBConn:
+    """Wraps a raw database connection with a consistent interface."""
     def __init__(self, conn, is_pg):
-        self.conn = conn
+        self.conn  = conn
         self.is_pg = is_pg
 
     def cursor(self):
@@ -164,15 +190,12 @@ class DBConn:
     def close(self):
         self.conn.close()
 
+
 def get_connection():
+    """Open and return a database connection (PostgreSQL or SQLite)."""
     if DATABASE_URL:
-        print(f">>> Attempting to connect to PostgreSQL...")
-        try:
-            conn = psycopg2.connect(DATABASE_URL)
-            return DBConn(conn, True)
-        except Exception as e:
-            print(f">>> PostgreSQL Connection Failed: {e}")
-            raise e
+        conn = psycopg2.connect(DATABASE_URL)
+        return DBConn(conn, True)
     else:
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
@@ -184,7 +207,7 @@ def get_connection():
 def init_db():
     _init_server_keys()
     conn = get_connection()
-    c = conn.cursor()
+    c    = conn.cursor()
 
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -212,16 +235,6 @@ def init_db():
         mac_tag     TEXT    NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )''')
-    conn.commit()
-
-    # Migration: add ecc_sig to existing DBs that predate this column
-    try:
-        c.execute("ALTER TABLE posts ADD COLUMN ecc_sig TEXT NOT NULL DEFAULT ''")
-        conn.commit()
-    except Exception:
-        if conn.is_pg:
-            conn.conn.rollback()
-        pass  # column already exists
 
     c.execute('''CREATE TABLE IF NOT EXISTS keys (
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -257,17 +270,22 @@ def init_db():
         FOREIGN KEY (sender_id)    REFERENCES users(id),
         FOREIGN KEY (recipient_id) REFERENCES users(id)
     )''')
-    conn.commit()
-    
-    try:
-        c.execute("ALTER TABLE messages ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0")
-        conn.commit()
-    except Exception:
-        if conn.is_pg:
-            conn.conn.rollback()
-        pass  # column already exists
 
     conn.commit()
+
+    # Migration: add columns that were introduced after the initial schema.
+    # These try/except blocks are safe — they do nothing if the column already exists.
+    for migration in [
+        "ALTER TABLE posts    ADD COLUMN ecc_sig  TEXT    NOT NULL DEFAULT ''",
+        "ALTER TABLE messages ADD COLUMN is_read  INTEGER NOT NULL DEFAULT 0",
+    ]:
+        try:
+            c.execute(migration)
+            conn.commit()
+        except Exception:
+            if conn.is_pg:
+                conn.conn.rollback()
+
     conn.close()
 
 
@@ -275,32 +293,36 @@ def init_db():
 
 def insert_user(username, email, contact, password_hash, salt,
                 rsa_pub, rsa_priv, ecc_pub, ecc_priv, role='user'):
-    username_enc  = field_encrypt(username)
-    email_enc     = field_encrypt(email)
-    contact_enc   = field_encrypt(contact)
-    rsa_pub_str   = serialize_rsa_pub(rsa_pub)
-    rsa_priv_enc  = encrypt_rsa_priv(rsa_priv)
-    ecc_pub_str   = serialize_ecc_pub(ecc_pub)
-    ecc_priv_enc  = encrypt_private_key(ecc_priv)
+    username_enc = field_encrypt(username)
+    email_enc    = field_encrypt(email)
+    contact_enc  = field_encrypt(contact)
+    rsa_pub_str  = serialize_rsa_pub(rsa_pub)
+    rsa_priv_enc = encrypt_rsa_priv(rsa_priv)
+    ecc_pub_str  = serialize_ecc_pub(ecc_pub)
+    ecc_priv_enc = encrypt_private_key(ecc_priv)
 
     mac_data = f"{username_enc}|{email_enc}|{contact_enc}|{role}"
     mac_tag  = generate_mac(mac_data, get_mac_key())
 
     conn = get_connection()
-    c = conn.cursor()
-    c.execute('''INSERT INTO users
+    c    = conn.cursor()
+    c.execute(
+        '''INSERT INTO users
+           (username_enc, email_enc, contact_enc, password_hash, salt, role,
+            rsa_pub, rsa_priv_enc, ecc_pub, ecc_priv_enc, mac_tag)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?)''',
         (username_enc, email_enc, contact_enc, password_hash, salt, role,
-         rsa_pub, rsa_priv_enc, ecc_pub, ecc_priv_enc, mac_tag)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?)''',
-        (username_enc, email_enc, contact_enc, password_hash, salt, role,
-         rsa_pub_str, rsa_priv_enc, ecc_pub_str, ecc_priv_enc, mac_tag))
+         rsa_pub_str, rsa_priv_enc, ecc_pub_str, ecc_priv_enc, mac_tag)
+    )
     user_id = c.lastrowid
 
-    # archive initial keypair in keys table
-    c.execute('''INSERT INTO keys
-        (user_id, key_version, rsa_pub, rsa_priv_enc, ecc_pub, ecc_priv_enc)
-        VALUES (?,?,?,?,?,?)''',
-        (user_id, 1, rsa_pub_str, rsa_priv_enc, ecc_pub_str, ecc_priv_enc))
+    # Archive the initial keypair in the keys table (version 1)
+    c.execute(
+        '''INSERT INTO keys
+           (user_id, key_version, rsa_pub, rsa_priv_enc, ecc_pub, ecc_priv_enc)
+           VALUES (?,?,?,?,?,?)''',
+        (user_id, 1, rsa_pub_str, rsa_priv_enc, ecc_pub_str, ecc_priv_enc)
+    )
 
     conn.commit()
     conn.close()
@@ -310,7 +332,7 @@ def insert_user(username, email, contact, password_hash, salt,
 def get_user_by_username(username):
     username_enc = field_encrypt(username)
     conn = get_connection()
-    row = conn.execute(
+    row  = conn.execute(
         'SELECT * FROM users WHERE username_enc = ?', (username_enc,)
     ).fetchone()
     conn.close()
@@ -319,7 +341,7 @@ def get_user_by_username(username):
 
 def get_user_by_id(user_id):
     conn = get_connection()
-    row = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+    row  = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
     conn.close()
     return row
 
@@ -342,7 +364,7 @@ def update_user_profile(user_id, email, contact):
     email_enc   = field_encrypt(email)
     contact_enc = field_encrypt(contact)
 
-    row = get_user_by_id(user_id)
+    row      = get_user_by_id(user_id)
     mac_data = f"{row['username_enc']}|{email_enc}|{contact_enc}|{row['role']}"
     mac_tag  = generate_mac(mac_data, get_mac_key())
 
@@ -356,7 +378,7 @@ def update_user_profile(user_id, email, contact):
 
 
 def rotate_user_keys(user_id, new_rsa_pub, new_rsa_priv, new_ecc_pub, new_ecc_priv):
-    conn = get_connection()
+    conn    = get_connection()
     version = conn.execute(
         'SELECT MAX(key_version) FROM keys WHERE user_id=?', (user_id,)
     ).fetchone()[0] or 0
@@ -366,14 +388,17 @@ def rotate_user_keys(user_id, new_rsa_pub, new_rsa_priv, new_ecc_pub, new_ecc_pr
     ecc_pub_str  = serialize_ecc_pub(new_ecc_pub)
     ecc_priv_enc = encrypt_private_key(new_ecc_priv)
 
-    conn.execute('''INSERT INTO keys
-        (user_id, key_version, rsa_pub, rsa_priv_enc, ecc_pub, ecc_priv_enc)
-        VALUES (?,?,?,?,?,?)''',
-        (user_id, version + 1, rsa_pub_str, rsa_priv_enc, ecc_pub_str, ecc_priv_enc))
-
-    conn.execute('''UPDATE users SET
-        rsa_pub=?, rsa_priv_enc=?, ecc_pub=?, ecc_priv_enc=? WHERE id=?''',
-        (rsa_pub_str, rsa_priv_enc, ecc_pub_str, ecc_priv_enc, user_id))
+    conn.execute(
+        '''INSERT INTO keys
+           (user_id, key_version, rsa_pub, rsa_priv_enc, ecc_pub, ecc_priv_enc)
+           VALUES (?,?,?,?,?,?)''',
+        (user_id, version + 1, rsa_pub_str, rsa_priv_enc, ecc_pub_str, ecc_priv_enc)
+    )
+    conn.execute(
+        '''UPDATE users SET
+           rsa_pub=?, rsa_priv_enc=?, ecc_pub=?, ecc_priv_enc=? WHERE id=?''',
+        (rsa_pub_str, rsa_priv_enc, ecc_pub_str, ecc_priv_enc, user_id)
+    )
 
     conn.commit()
     conn.close()
@@ -384,6 +409,17 @@ def verify_user_mac(row):
     return verify_mac(mac_data, get_mac_key(), row['mac_tag'])
 
 
+def update_user_role(user_id, new_role):
+    row      = get_user_by_id(user_id)
+    mac_data = f"{row['username_enc']}|{row['email_enc']}|{row['contact_enc']}|{new_role}"
+    mac_tag  = generate_mac(mac_data, get_mac_key())
+
+    conn = get_connection()
+    conn.execute('UPDATE users SET role=?, mac_tag=? WHERE id=?', (new_role, mac_tag, user_id))
+    conn.commit()
+    conn.close()
+
+
 # ── Post operations ───────────────────────────────────────────────────────────
 
 def insert_post(user_id, title_enc, content_enc, ecc_sig=''):
@@ -391,9 +427,12 @@ def insert_post(user_id, title_enc, content_enc, ecc_sig=''):
     mac_tag  = generate_mac(mac_data, get_mac_key())
 
     conn = get_connection()
-    c = conn.cursor()
-    c.execute('''INSERT INTO posts (user_id, title_enc, content_enc, ecc_sig, mac_tag)
-                 VALUES (?,?,?,?,?)''', (user_id, title_enc, content_enc, ecc_sig, mac_tag))
+    c    = conn.cursor()
+    c.execute(
+        '''INSERT INTO posts (user_id, title_enc, content_enc, ecc_sig, mac_tag)
+           VALUES (?,?,?,?,?)''',
+        (user_id, title_enc, content_enc, ecc_sig, mac_tag)
+    )
     post_id = c.lastrowid
     conn.commit()
     conn.close()
@@ -411,13 +450,13 @@ def get_posts_by_user(user_id):
 
 def get_post_by_id(post_id):
     conn = get_connection()
-    row = conn.execute('SELECT * FROM posts WHERE id=?', (post_id,)).fetchone()
+    row  = conn.execute('SELECT * FROM posts WHERE id=?', (post_id,)).fetchone()
     conn.close()
     return row
 
 
 def update_post(post_id, title_enc, content_enc, ecc_sig=''):
-    row = get_post_by_id(post_id)
+    row      = get_post_by_id(post_id)
     mac_data = f"{row['user_id']}|{title_enc}|{content_enc}"
     mac_tag  = generate_mac(mac_data, get_mac_key())
 
@@ -458,17 +497,6 @@ def get_key_history(user_id):
     return rows
 
 
-def update_user_role(user_id, new_role):
-    row = get_user_by_id(user_id)
-    mac_data = f"{row['username_enc']}|{row['email_enc']}|{row['contact_enc']}|{new_role}"
-    mac_tag  = generate_mac(mac_data, get_mac_key())
-
-    conn = get_connection()
-    conn.execute('UPDATE users SET role=?, mac_tag=? WHERE id=?', (new_role, mac_tag, user_id))
-    conn.commit()
-    conn.close()
-
-
 # ── Friendship operations ─────────────────────────────────────────────────────
 
 def send_friend_request(requester_id, recipient_id):
@@ -482,8 +510,9 @@ def send_friend_request(requester_id, recipient_id):
 
 
 def get_friendship(user_a, user_b):
+    """Return the friendship row between two users (in either direction), or None."""
     conn = get_connection()
-    row = conn.execute(
+    row  = conn.execute(
         '''SELECT * FROM friendships WHERE
            (requester_id=? AND recipient_id=?) OR (requester_id=? AND recipient_id=?)
            LIMIT 1''',
@@ -535,8 +564,9 @@ def get_friends(user_id):
 
 
 def are_friends(user_a, user_b):
+    """Return True if the two users have an accepted friendship."""
     conn = get_connection()
-    row = conn.execute(
+    row  = conn.execute(
         """SELECT id FROM friendships WHERE
            ((requester_id=? AND recipient_id=?) OR (requester_id=? AND recipient_id=?))
            AND status='accepted' LIMIT 1""",
@@ -582,7 +612,7 @@ def verify_message_mac(row):
 
 
 def get_unread_messages_count(user_id):
-    conn = get_connection()
+    conn  = get_connection()
     count = conn.execute(
         'SELECT COUNT(*) FROM messages WHERE recipient_id=? AND is_read=0', (user_id,)
     ).fetchone()[0]
@@ -591,9 +621,10 @@ def get_unread_messages_count(user_id):
 
 
 def get_unread_count_from(user_id, sender_id):
-    conn = get_connection()
+    conn  = get_connection()
     count = conn.execute(
-        'SELECT COUNT(*) FROM messages WHERE recipient_id=? AND sender_id=? AND is_read=0', (user_id, sender_id)
+        'SELECT COUNT(*) FROM messages WHERE recipient_id=? AND sender_id=? AND is_read=0',
+        (user_id, sender_id)
     ).fetchone()[0]
     conn.close()
     return count
